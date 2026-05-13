@@ -30,8 +30,11 @@ const resetDiagnostic = () => {
         </svg>
       </div>
       <div class="header-content">
-        <h2>API Configuration</h2>
-        <p class="panel-desc">Your Gemini API key powers the AI engine. It's stored locally and never leaves your device.</p>
+        <h2 v-if="!store.isConfigured">Welcome to Lumina AI</h2>
+        <h2 v-else>API Configuration</h2>
+        <p class="panel-desc">
+          {{ !store.isConfigured ? 'Let\'s get started. Your Gemini API key powers the AI engine. It\'s stored locally and never leaves your device.' : 'Your Gemini API key powers the AI engine. It\'s stored locally and never leaves your device.' }}
+        </p>
       </div>
     </div>
 

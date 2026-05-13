@@ -199,12 +199,19 @@ main.container {
   z-index: 1;
 }
 
+.welcome-badge {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
 .onboarding-title {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  font-weight: 900;
   color: var(--text-main);
   margin-bottom: 1rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
 }
 
 .onboarding-desc {
@@ -318,11 +325,8 @@ main.container {
 @media (max-width: 640px) {
   .onboarding {
     padding: 1.5rem;
-    margin: 1rem;
-  }
-
-  .onboarding-title {
-    font-size: 1.8rem;
+    margin: 1rem auto;
+    border-radius: 20px;
   }
 
   .actions {
@@ -341,7 +345,7 @@ main.container {
   }
   
   .app-footer {
-    padding: 1.5rem 1rem;
+    display: none;
   }
 }
 </style>

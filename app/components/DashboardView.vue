@@ -62,24 +62,26 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
     </div>
 
     <!-- Top Progress Indicator -->
-    <div class="progress-container card-premium glass">
-      <div class="progress-steps">
-        <div 
-          v-for="(tab, idx) in tabs" 
-          :key="tab.id"
-          class="step-node"
-          :class="{ active: activeTab === idx, completed: activeTab > idx }"
-          @click="activeTab = idx"
-        >
-          <div class="step-icon-wrap">
-            <span v-if="activeTab > idx">✅</span>
-            <span v-else>{{ tab.icon }}</span>
+    <div class="progress-wrapper">
+      <div class="progress-container card-premium glass">
+        <div class="progress-steps">
+          <div 
+            v-for="(tab, idx) in tabs" 
+            :key="tab.id"
+            class="step-node"
+            :class="{ active: activeTab === idx, completed: activeTab > idx }"
+            @click="activeTab = idx"
+          >
+            <div class="step-icon-wrap">
+              <span v-if="activeTab > idx">✅</span>
+              <span v-else>{{ tab.icon }}</span>
+            </div>
+            <span class="step-label">{{ tab.title }}</span>
           </div>
-          <span class="step-label">{{ tab.title }}</span>
         </div>
-      </div>
-      <div class="progress-track-bg">
-        <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
+        <div class="progress-track-bg">
+          <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
+        </div>
       </div>
     </div>
 
@@ -88,6 +90,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
       <main class="wizard-content card-premium">
         <Transition name="fade" mode="out-in">
           <div :key="activeTab" class="tab-view">
+            <!-- Steps handled by v-if blocks -->
             <!-- Step 0: Identity -->
             <div v-if="activeTab === 0" class="step-pane">
               <h3>Where are we starting?</h3>
@@ -306,9 +309,9 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
               <div class="plan-details card-premium glass mt-4">
                 <h4 class="plan-title">Curriculum Overview</h4>
                 <ul class="plan-list">
-                  <li><span class="dot"></span> Immersive {{ model.focusArea }} practice in a {{ model.learningScenario }} context.</li>
-                  <li><span class="dot"></span> {{ model.quizLength }} adaptive questions with {{ model.explanationDepth }} feedback.</li>
-                  <li><span class="dot"></span> Real-time phonetic guides and color-coded linguistic breakdown.</li>
+                  <li><span class="dot"></span> <div>Immersive {{ model.focusArea }} practice in a {{ model.learningScenario }} context.</div></li>
+                  <li><span class="dot"></span> <div>{{ model.quizLength }} adaptive questions with {{ model.explanationDepth }} feedback.</div></li>
+                  <li><span class="dot"></span> <div>Real-time phonetic guides and color-coded linguistic breakdown.</div></li>
                 </ul>
               </div>
 
@@ -346,6 +349,37 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
           </button>
         </div>
       </main>
+
+      <!-- Sidebar Preview (Desktop Only) -->
+      <aside class="session-preview sidebar card-premium glass" v-if="activeTab < 4">
+        <div class="preview-header">
+          <span class="badge badge-primary">Session Preview</span>
+          <h3>Live Curriculum</h3>
+        </div>
+        <div class="preview-body">
+          <div class="preview-item">
+            <span class="label">Goal</span>
+            <span class="value">{{ model.learningGoal || 'Exploring...' }}</span>
+          </div>
+          <div class="preview-item">
+            <span class="label">Topic</span>
+            <span class="value">{{ model.topic || 'Custom Subject' }}</span>
+          </div>
+          <div class="preview-item">
+            <span class="label">Config</span>
+            <div class="mini-chips">
+              <span class="mini-chip">{{ model.proficiencyLevel }}</span>
+              <span class="mini-chip">{{ model.focusArea }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="preview-footer">
+          <div class="ready-check" :class="{ 'is-ready': canContinue }">
+            <div class="dot"></div>
+            <span>{{ canContinue ? 'Ready to proceed' : 'Pending input' }}</span>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
@@ -374,10 +408,19 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 /* Progress Indicator */
+.progress-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: 1rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
 .progress-container {
-  padding: 1.5rem 2rem;
+  padding: 1rem;
   position: relative;
-  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 20px;
 }
 
 .progress-steps {
@@ -391,9 +434,10 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   cursor: pointer;
-  width: 80px;
+  flex: 1;
+  min-width: 0;
   transition: all 0.3s var(--ease-premium);
 }
 
@@ -424,11 +468,16 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .step-label {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .step-node.active .step-label {
@@ -437,9 +486,9 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 .progress-track-bg {
   position: absolute;
-  top: 36px;
-  left: 60px;
-  right: 60px;
+  top: 38px;
+  left: 10%;
+  right: 10%;
   height: 2px;
   background: var(--border-light);
   z-index: 1;
@@ -453,15 +502,21 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 /* Layout Grid */
 .layout-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
   width: 100%;
+}
+
+@media (min-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr 320px;
+    align-items: start;
+  }
 }
 
 .wizard-content {
   width: 100%;
-  max-width: 800px;
   padding: clamp(1.5rem, 5vw, 3rem);
   min-height: clamp(300px, 60vh, 550px);
   display: flex;
@@ -758,8 +813,14 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .plan-details {
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: left;
+}
+
+@media (min-width: 600px) {
+  .plan-details {
+    padding: 2rem;
+  }
 }
 
 .plan-title {
@@ -781,10 +842,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 .plan-list li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   font-weight: 600;
   color: var(--text-main);
+  line-height: 1.5;
 }
 
 .dot {
@@ -793,61 +855,168 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   background: var(--primary);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--primary-glow);
+  flex-shrink: 0;
+  margin-top: 0.6em;
 }
 
 .review-footer-action {
   text-align: center;
 }
 
+/* Sidebar Styles */
+.session-preview {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .session-preview {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    position: sticky;
+    top: 2rem;
+  }
+}
+
+.preview-header h3 {
+  font-size: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.preview-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.preview-item .label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  letter-spacing: 0.05em;
+}
+
+.preview-item .value {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.mini-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mini-chip {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--primary-glow);
+  color: var(--primary);
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.preview-footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.ready-check {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+}
+
+.ready-check.is-ready {
+  color: var(--primary);
+}
+
+.ready-check .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+}
+
+.ready-check.is-ready .dot {
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
-  .layout-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .session-preview {
-    order: -1;
-  }
-  
-  .preview-card {
-    position: static;
-  }
-  
-  .dashboard-header h1 {
-    font-size: 2.5rem;
+  .lumina-dashboard {
+    padding: 1rem;
+    gap: 1.5rem;
   }
 }
 
 @media (max-width: 600px) {
-  .progress-steps {
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-  }
-  
-  .step-node {
-    width: 60px;
-  }
-  
-  .step-label {
-    display: none;
-  }
-  
-  .progress-track-bg {
-    display: none;
-  }
-  
   .wizard-content {
     padding: 1.5rem;
+    min-height: auto;
   }
   
-  .form-grid {
+  .step-pane h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .choice-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .choice-grid.cols-2 {
     grid-template-columns: 1fr;
   }
+
+  .session-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .summary-card {
+    padding: 1rem;
+  }
 }
+
 @media (max-width: 520px) {
   .review-header-visual {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .visual-circle-premium {
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+
+  .header-text h3 {
+    font-size: 1.5rem;
+  }
+  .plan-title {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .plan-list li {
+    font-size: 0.9rem;
+    gap: 0.75rem;
   }
 }
 </style>
