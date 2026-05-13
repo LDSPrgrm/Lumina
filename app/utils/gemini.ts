@@ -325,4 +325,22 @@ CRITICAL QUALITY RULES:
       contents: [
         { role: "user", parts: [{ text: diagnosticPrompt }] },
       ],
-      generationCo
+      generationConfig: { responseMimeType: "application/json" },
+    }),
+  };
+
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || "Failed to generate diagnostic quiz.");
+  }
+
+  const data = await response.json();
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  
+  const raw = JSON.parse(text);
+  const dataParsed = Array.isArray(raw) ? { questions: raw } : raw;
+  const questions = QuizZodSchema.parse(dataParsed).questions as QuizQuestion[];
+  return shuffleQuizQuestions(questions);
+};
