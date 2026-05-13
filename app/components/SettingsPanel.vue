@@ -30,10 +30,9 @@ const resetDiagnostic = () => {
         </svg>
       </div>
       <div class="header-content">
-        <h2 v-if="!store.isConfigured">Welcome to Lumina AI</h2>
-        <h2 v-else>API Configuration</h2>
+        <h2>API Configuration</h2>
         <p class="panel-desc">
-          {{ !store.isConfigured ? 'Let\'s get started. Your Gemini API key powers the AI engine. It\'s stored locally and never leaves your device.' : 'Your Gemini API key powers the AI engine. It\'s stored locally and never leaves your device.' }}
+          Your Gemini API key powers the AI engine. It's stored locally and never leaves your device.
         </p>
       </div>
     </div>
@@ -63,14 +62,25 @@ const resetDiagnostic = () => {
       </div>
 
       <!-- Save button -->
-      <button class="btn btn-primary w-full save-btn" @click="saveSettings">
-        <svg v-if="!saved" width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        {{ saved ? 'Configuration Saved!' : 'Update API Key' }}
+      <button 
+        class="btn btn-primary w-full save-btn" 
+        :class="{ 'btn-success-pulse': saved }"
+        @click="saveSettings"
+      >
+        <Transition name="fade-scale" mode="out-in">
+          <div v-if="!saved" key="save" class="btn-content">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Update API Key</span>
+          </div>
+          <div v-else key="saved" class="btn-content">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Configuration Saved!</span>
+          </div>
+        </Transition>
       </button>
 
       <!-- Help link -->
@@ -251,20 +261,75 @@ const resetDiagnostic = () => {
 
 @media (max-width: 640px) {
   .settings-panel {
-    padding: 1.25rem;
+    padding: 1.25rem 1rem;
   }
   
   .panel-header {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .header-icon-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .header-content h2 {
+    font-size: 1.35rem;
   }
 
   .help-box {
     flex-direction: column;
     text-align: center;
+    padding: 1rem;
+    gap: 1.25rem;
   }
+
+  .help-text strong {
+    font-size: 0.9rem;
+  }
+
+  .help-text p {
+    font-size: 0.8rem;
+  }
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.btn-success-pulse {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  animation: success-pulse 0.5s ease;
+}
+
+@keyframes success-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 0.25s var(--ease-premium);
+}
+
+.fade-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(1.1);
 }
 .text-error {
   color: var(--error) !important;

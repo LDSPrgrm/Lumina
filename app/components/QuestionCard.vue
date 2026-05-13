@@ -643,10 +643,86 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 }
 
 @media (max-width: 640px) {
-  .lumina-question-card { padding: 1.25rem; }
-  .phrase-row { font-size: 1.15rem; }
-  .correction-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
-  .btn-primary { width: 100%; }
-  .vocab-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .lumina-question-card { 
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+  }
+
+  .question-main {
+    font-size: clamp(1.15rem, 5.5vw, 1.5rem);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  .option-card {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .option-indicator .letter {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .phrase-row { 
+    font-size: 1.1rem; 
+    line-height: 1.6;
+  }
+
+  .romaji-row, .english-row {
+    font-size: 0.85rem;
+  }
+
+  .explanation-container {
+    padding: 1rem;
+  }
+
+  .correction-header { 
+    flex-direction: column; 
+    gap: 1rem; 
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .status-msg {
+    font-size: 1.1rem;
+  }
+
+  .explanation-body {
+    font-size: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .vocab-grid { 
+    grid-template-columns: 1fr;
+    gap: 0.75rem; 
+  }
+
+  .vocab-item {
+    padding: 0.85rem 1rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .vocab-top {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .vocab-text {
+    font-size: 1.1rem;
+  }
+
+  .vocab-bottom {
+    margin-top: 0;
+    font-size: 0.85rem;
+    text-align: right;
+  }
 }
 </style>

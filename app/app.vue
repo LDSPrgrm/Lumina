@@ -18,7 +18,7 @@ function handleRetake(session: any) {
 <template>
   <div class="app-container">
     <AppHeader>
-      <template #nav>
+      <template #nav v-if="store.isConfigured">
         <!-- Segmented control nav -->
         <div class="pill-nav" role="tablist" aria-label="Main navigation">
           <button
@@ -54,50 +54,7 @@ function handleRetake(session: any) {
 
     <main class="container">
       <!-- Onboarding Screen -->
-      <div
-        v-if="!store.isConfigured && store.currentTab !== 'settings'"
-        class="onboarding glass-card animate-fade-in-up"
-      >
-        <div class="onboarding-content">
-          <div class="welcome-badge animate-scale-in">
-            <span class="badge badge-completed">Private & Secure</span>
-          </div>
-
-          <h1 class="onboarding-title">Master Languages with Gemini</h1>
-
-          <p class="onboarding-desc">
-            Personalized quizzes powered by Google Gemini Flash. Get started by configuring your free API key.
-          </p>
-
-          <div class="feature-steps">
-            <div class="step">
-              <div class="step-num">1</div>
-              <span class="step-text">Get a free API key from Google AI Studio</span>
-            </div>
-            <div class="step">
-              <div class="step-num">2</div>
-              <span class="step-text">Paste it in settings — takes 5 seconds</span>
-            </div>
-            <div class="step">
-              <div class="step-num">3</div>
-              <span class="step-text">Start learning instantly</span>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-primary" @click="store.currentTab = 'settings'">
-              Configure Now
-            </button>
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              class="btn btn-outline"
-            >
-              Get Free Key
-            </a>
-          </div>
-        </div>
-      </div>
+      <OnboardingView v-if="!store.isConfigured" />
 
       <div v-else class="content-wrapper">
         <QuizPlayer v-if="store.currentTab === 'quiz'" />

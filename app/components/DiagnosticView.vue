@@ -242,15 +242,48 @@ function handleStart() {
 
 @media (max-width: 640px) {
   .diagnostic-onboarding {
-    padding: 2rem 1.25rem;
+    padding: 1.5rem 1rem;
     margin: 1rem auto;
-    max-width: 95%;
+    max-width: 96%;
   }
   
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1rem;
     margin-bottom: 2rem;
+  }
+
+  .title {
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
+  }
+
+  .description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-boxes {
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .info-box {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .info-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .info-text strong {
+    font-size: 0.95rem;
+  }
+
+  .info-text span {
+    font-size: 0.85rem;
   }
 }
 </style>

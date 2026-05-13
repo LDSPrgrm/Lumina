@@ -564,8 +564,64 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 }
 
 @media (max-width: 640px) {
-  .result-celebration { padding: 2rem 1.25rem; }
-  .result-actions { flex-direction: column; width: 100%; align-items: stretch; }
-  .btn { width: 100%; }
+  .lumina-result-view {
+    gap: 2rem;
+    padding: 0.5rem;
+  }
+
+  .result-celebration {
+    padding: 2.5rem 1.25rem;
+    gap: 1.5rem;
+  }
+
+  .score-orbit {
+    width: 140px;
+    height: 140px;
+  }
+
+  .percentage {
+    font-size: 2.25rem;
+  }
+
+  .celebration-text h1 {
+    font-size: 2rem;
+  }
+
+  .celebration-text .summary {
+    font-size: 1rem;
+  }
+
+  .result-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .diagnostic-result {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .diagnostic-result h2 {
+    font-size: 1.4rem;
+  }
+
+  .review-card {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .q-text {
+    font-size: 1.1rem;
+  }
+
+  .q-answer-box {
+    padding: 1rem;
+  }
+
+  .section-header h3 {
+    font-size: 1.25rem;
+  }
 }
 </style>
