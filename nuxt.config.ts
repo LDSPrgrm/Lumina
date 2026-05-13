@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     }
   },
   app: {
+    baseURL: "/Lumina/",
     head: {
       title: "Lumina - AI Language Learning",
       meta: [

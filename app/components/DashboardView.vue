@@ -612,6 +612,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 /* Slider */
 .slider-premium {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 6px;
   background: var(--border-light);
