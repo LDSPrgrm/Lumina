@@ -341,7 +341,7 @@ main.container {
   }
   
   .app-footer {
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
   }
 }
 </style>

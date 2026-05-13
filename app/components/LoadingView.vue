@@ -195,9 +195,9 @@ onMounted(() => {
 }
 
 .status-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Fact Box */

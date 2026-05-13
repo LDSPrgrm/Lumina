@@ -76,6 +76,8 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {

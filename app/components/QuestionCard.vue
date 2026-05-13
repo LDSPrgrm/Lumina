@@ -96,7 +96,7 @@ const vocabItems = computed(() => {
             :key="tIdx"
             class="token-wrapper"
           >
-            <span class="token-premium" :class="`token-${token.colorIndex}`">
+            <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
               <ruby>
                 {{ token.text }}
                 <rt>{{ token.reading }}</rt>
@@ -158,7 +158,7 @@ const vocabItems = computed(() => {
               :key="tIdx"
               class="token-wrapper"
             >
-              <span class="token-premium" :class="`token-${token.colorIndex}`">
+              <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
                 <ruby v-if="token.reading && token.text !== token.reading">
                   {{ token.text }}
                   <rt>{{ token.reading }}</rt>
@@ -283,7 +283,7 @@ const vocabItems = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 0 0.25rem;
-  font-size: 2.25rem;
+  font-size: clamp(1.4rem, 5vw, 2.25rem);
   font-weight: 850;
   line-height: 1.8; /* Increased for ruby/furigana spacing */
   margin-bottom: 2rem;
@@ -334,10 +334,27 @@ const vocabItems = computed(() => {
   pointer-events: none;
 }
 
-.token-premium:hover .token-tooltip {
+.token-premium:hover .token-tooltip,
+.token-premium:focus .token-tooltip,
+.token-premium:focus-within .token-tooltip {
   visibility: visible;
   opacity: 1;
   transform: translateX(-50%) translateY(-10px);
+}
+
+@media (max-width: 900px) {
+  .lumina-question-card { 
+    margin: 1.5rem auto;
+    padding: 2rem; 
+    gap: 1.5rem;
+  }
+  .question-main { 
+    margin-bottom: 1.5rem; 
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+  }
+  .option-card {
+    padding: 1.25rem;
+  }
 }
 
 .romaji-line, .english-line {
@@ -617,11 +634,19 @@ const vocabItems = computed(() => {
 ruby { ruby-position: over; }
 rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 
+@media (max-width: 900px) {
+  .lumina-question-card { 
+    margin: 1rem auto;
+    padding: 1.75rem; 
+  }
+  .question-main { margin-bottom: 1.5rem; }
+}
+
 @media (max-width: 640px) {
-  .lumina-question-card { padding: 1.5rem; }
-  .question-main { font-size: 1.75rem; }
+  .lumina-question-card { padding: 1.25rem; }
   .phrase-row { font-size: 1.15rem; }
   .correction-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
   .btn-primary { width: 100%; }
+  .vocab-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 }
 </style>

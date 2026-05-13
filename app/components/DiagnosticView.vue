@@ -97,7 +97,7 @@ function handleStart() {
 .diagnostic-onboarding {
   max-width: 650px;
   width: 100%;
-  margin: 4rem auto;
+  margin: clamp(1.5rem, 5vh, 4rem) auto;
   padding: 3.5rem;
   position: relative;
 }
@@ -113,7 +113,7 @@ function handleStart() {
 }
 
 .title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -0.04em;
@@ -230,19 +230,27 @@ function handleStart() {
   font-weight: 500;
 }
 
+@media (max-width: 900px) {
+  .diagnostic-onboarding {
+    padding: 3rem 2rem;
+    margin: 2rem auto;
+    max-width: 90%
+  }
+  .title { margin-bottom: 0.5rem; }
+  .description { margin-bottom: 2rem; }
+}
+
 @media (max-width: 640px) {
   .diagnostic-onboarding {
-    padding: 2.5rem 1.5rem;
-    margin: 1.5rem;
+    padding: 2rem 1.25rem;
+    margin: 1rem auto;
+    max-width: 95%;
   }
   
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .title {
-    font-size: 2.25rem;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
   }
 }
 </style>

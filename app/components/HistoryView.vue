@@ -120,12 +120,14 @@ function getScoreColor(percentage: number) {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s var(--ease-premium);
 }
 
 .history-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.01);
   box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+  background: white;
 }
 
 .session-date {

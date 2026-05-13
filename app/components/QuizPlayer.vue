@@ -264,7 +264,7 @@ function handleBackToDashboard() {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2rem 1rem;
+  padding: clamp(1rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem);
 }
 
 .session-active {
@@ -276,7 +276,7 @@ function handleBackToDashboard() {
 
 .session-nav {
   display: grid;
-  grid-template-columns: 240px 1fr 240px;
+  grid-template-columns: minmax(160px, 240px) 1fr minmax(120px, 240px);
   align-items: center;
   padding: 0.75rem 1.5rem;
   position: sticky;
@@ -321,7 +321,7 @@ function handleBackToDashboard() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  max-width: min(150px, 30vw);
 }
 
 .session-counter {
@@ -407,6 +407,7 @@ function handleBackToDashboard() {
 @media (max-width: 850px) {
   .session-nav {
     grid-template-columns: 1fr auto;
+    gap: 0.75rem;
     padding: 1rem;
   }
   
@@ -415,5 +416,15 @@ function handleBackToDashboard() {
     order: 3;
     padding: 0.5rem 0 0;
   }
+
+  .session-title { max-width: 140px; }
+}
+
+@media (max-width: 640px) {
+  .session-active { gap: 1.5rem; }
+  .session-nav { border-radius: var(--radius-md); top: 0.5rem; padding: 0.75rem 1rem; }
+  .pill span:not(.icon) { display: none; }
+  .pill { padding: 0.35rem 0.6rem; }
+  .session-title { max-width: 100px; }
 }
 </style>

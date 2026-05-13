@@ -166,7 +166,7 @@ function highlightAnswer(q: QuizQuestion) {
                     :key="tIdx"
                     class="token-wrapper"
                   >
-                    <span class="token-premium" :class="`token-${token.colorIndex}`">
+                    <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
                       <ruby v-if="token.reading && token.text !== token.reading">
                         {{ token.text }}
                         <rt>{{ token.reading }}</rt>
@@ -188,7 +188,7 @@ function highlightAnswer(q: QuizQuestion) {
                     :key="tIdx"
                     class="token-wrapper"
                   >
-                    <span class="token-premium" :class="`token-${token.colorIndex}`">
+                    <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
                       <ruby v-if="token.reading && token.text !== token.reading">
                         {{ token.text }}
                         <rt>{{ token.reading }}</rt>
@@ -301,7 +301,7 @@ function highlightAnswer(q: QuizQuestion) {
 }
 
 .celebration-text h1 {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 8vw, 3.5rem);
   margin-bottom: 0.75rem;
 }
 
@@ -334,6 +334,12 @@ function highlightAnswer(q: QuizQuestion) {
 .result-actions {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.result-actions .btn {
+  min-width: 160px;
 }
 
 .diagnostic-result {
@@ -532,7 +538,9 @@ function highlightAnswer(q: QuizQuestion) {
   transition: all 0.2s var(--ease-premium);
 }
 
-.token-premium:hover .token-tooltip {
+.token-premium:hover .token-tooltip,
+.token-premium:focus .token-tooltip,
+.token-premium:focus-within .token-tooltip {
   visibility: visible;
   opacity: 1;
   transform: translateX(-50%) translateY(-14px);
@@ -548,9 +556,16 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
   text-underline-offset: 4px;
 }
 
+@media (max-width: 900px) {
+  .result-celebration { padding: 3rem 1.5rem; gap: 2rem; }
+  .celebration-text h1 { font-size: 2.75rem; }
+  .score-orbit { width: 160px; height: 160px; }
+  .percentage { font-size: 2.5rem; }
+}
+
 @media (max-width: 640px) {
-  .celebration-text h1 { font-size: 2.5rem; }
-  .result-actions { flex-direction: column; width: 100%; }
+  .result-celebration { padding: 2rem 1.25rem; }
+  .result-actions { flex-direction: column; width: 100%; align-items: stretch; }
   .btn { width: 100%; }
 }
 </style>

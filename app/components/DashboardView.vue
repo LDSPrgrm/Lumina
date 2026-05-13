@@ -365,7 +365,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .dashboard-header h1 {
-  font-size: 3.5rem;
+  font-size: clamp(1.75rem, 5vw, 3.5rem);
   margin-bottom: 0.5rem;
 }
 
@@ -462,8 +462,8 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 .wizard-content {
   width: 100%;
   max-width: 800px;
-  padding: 3rem;
-  min-height: 550px;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  min-height: clamp(300px, 60vh, 550px);
   display: flex;
   flex-direction: column;
 }
@@ -719,10 +719,10 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .summary-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--primary-light);
+  transform: translateY(-5px) scale(1.02);
+  border-color: var(--primary-border);
   background: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .summary-icon {
@@ -842,6 +842,12 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   
   .form-grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .review-header-visual {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
