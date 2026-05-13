@@ -163,9 +163,10 @@ CRITICAL RULES FOR QUESTION GENERATION:
    - Color indexes (0-5) must be consistent for the same concept across all arrays.
 7. SYMBOL-BY-SYMBOL BREAKDOWN: 
    - Every sentence (question and all options) MUST be broken down into 'tokens'.
-   - Each token MUST have: 'text', 'reading', 'meaning', and 'colorIndex'.
+   - Each token MUST be an object with: 'text', 'reading', 'meaning', and 'colorIndex'.
+   - NEVER return a token as a plain string; always use an object.
    - Use 'colorIndex' to group related words.
-   - NEVER leave 'colorIndex' or 'meaning' as null; provide a best-effort translation or index.
+
 5. NO LEAKAGE: Never put the correct answer in the explanation in a way that reveals it before the user answers.
 6. NATIVE-LIKE PHRASING: Sentences should sound like something a native speaker would actually say.
 
