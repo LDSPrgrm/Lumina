@@ -92,9 +92,9 @@ main.container {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1000px;
+  max-width: v-bind("store.currentTab === 'quiz' ? '100%' : '1000px'");
   margin: 0 auto;
-  padding: 1rem;
+  padding: v-bind("store.currentTab === 'quiz' ? '0' : '1rem'");
   /* Prevent full-page scroll if content fits */
   overflow-y: auto;
   overflow-x: hidden;

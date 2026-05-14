@@ -385,12 +385,13 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 <style scoped>
 .lumina-dashboard {
-  max-width: 1000px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  padding: 2rem 1.5rem;
+  padding: clamp(1rem, 4vw, 4rem);
 }
 
 .dashboard-header {
@@ -518,7 +519,16 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   display: flex;
   flex-direction: column;
   position: relative;
-  border-radius: 32px;
+  border-radius: 40px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xl);
+}
+
+.step-pane {
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .step-pane h3 {

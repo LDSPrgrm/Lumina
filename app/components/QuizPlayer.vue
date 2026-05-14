@@ -258,7 +258,7 @@ function handleBackToDashboard() {
 <style scoped>
 .lumina-quiz-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
