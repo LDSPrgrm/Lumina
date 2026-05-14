@@ -169,7 +169,10 @@ onMounted(() => {
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 1.5rem;
-  height: 1.8rem; /* Maintain height for transitions */
+  min-height: 3.6rem; /* Allow space for 2 lines when wrapping */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .progress-bar {
@@ -227,5 +230,28 @@ onMounted(() => {
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .loading-content {
+    padding: 3rem 1.5rem;
+    gap: 2rem;
+  }
+  
+  .status-title {
+    font-size: 1.25rem;
+    min-height: 3rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .loader-visual {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .fact-box {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
 }
 </style>
