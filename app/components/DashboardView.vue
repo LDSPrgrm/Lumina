@@ -55,10 +55,9 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 <template>
   <div class="lumina-dashboard animate-in">
-    <div class="dashboard-header">
-      <span class="badge badge-primary mb-3">AI Language Tutor</span>
-      <h1 class="text-gradient">Welcome to Lumina</h1>
-      <p class="text-muted">Design your perfect language learning session in seconds.</p>
+    <div class="dashboard-header compact">
+      <span class="badge badge-primary">Practice Session</span>
+      <h2 class="section-title">Configure Your Lesson</h2>
     </div>
 
     <!-- Top Progress Indicator -->
@@ -88,6 +87,32 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
     <div class="layout-grid">
       <!-- Main Wizard Content -->
       <main class="wizard-content card-premium">
+        <!-- Wizard Actions (Relocated to top right) -->
+        <div class="wizard-actions">
+          <button 
+            v-if="activeTab > 0" 
+            class="btn btn-outline btn-sm" 
+            @click="activeTab--"
+          >
+            Back
+          </button>
+          <button 
+            v-if="activeTab < tabs.length - 1" 
+            class="btn btn-primary btn-sm" 
+            :disabled="!canContinue"
+            @click="activeTab++"
+          >
+            Continue
+          </button>
+          <button 
+            v-else 
+            class="btn btn-primary btn-sm start-pulse" 
+            @click="$emit('start')"
+          >
+            Start Learning
+          </button>
+        </div>
+
         <Transition name="fade" mode="out-in">
           <div :key="activeTab" class="tab-view">
             <!-- Steps handled by v-if blocks -->
@@ -322,32 +347,6 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
           </div>
         </Transition>
 
-        <!-- Wizard Actions -->
-        <div class="wizard-actions">
-          <button 
-            v-if="activeTab > 0" 
-            class="btn btn-outline" 
-            @click="activeTab--"
-          >
-            Back
-          </button>
-          <div class="spacer"></div>
-          <button 
-            v-if="activeTab < tabs.length - 1" 
-            class="btn btn-primary" 
-            :disabled="!canContinue"
-            @click="activeTab++"
-          >
-            Continue
-          </button>
-          <button 
-            v-else 
-            class="btn btn-primary start-pulse" 
-            @click="$emit('start')"
-          >
-            Start Learning
-          </button>
-        </div>
       </main>
 
       <!-- Sidebar Preview (Desktop Only) -->
@@ -386,41 +385,47 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 <style scoped>
 .lumina-dashboard {
-  max-width: 850px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 1rem;
+  gap: 2.5rem;
+  padding: 2rem 1.5rem;
 }
 
 .dashboard-header {
   text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-.dashboard-header h1 {
-  font-size: clamp(1.75rem, 5vw, 3.5rem);
-  margin-bottom: 0.5rem;
+.dashboard-header.compact {
+  text-align: left;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.dashboard-header p {
-  font-size: 1.125rem;
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin: 0;
 }
 
 /* Progress Indicator */
 .progress-wrapper {
   width: 100%;
-  overflow-x: auto;
   padding: 1rem 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .progress-container {
-  padding: 1rem;
+  padding: 1.25rem;
   position: relative;
   width: 100%;
   margin: 0 auto;
-  border-radius: 20px;
+  border-radius: 24px;
 }
 
 .progress-steps {
@@ -434,7 +439,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -442,23 +447,23 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .step-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
   background: var(--bg-subtle);
   border: 1px solid var(--border-main);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   transition: all 0.3s var(--ease-premium);
 }
 
 .step-node.active .step-icon-wrap {
   background: white;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-glow);
-  transform: scale(1.1);
+  box-shadow: 0 0 0 5px var(--primary-glow);
+  transform: scale(1.15);
 }
 
 .step-node.completed .step-icon-wrap {
@@ -468,16 +473,13 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .step-label {
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
 }
 
 .step-node.active .step-label {
@@ -486,10 +488,10 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 .progress-track-bg {
   position: absolute;
-  top: 38px;
+  top: 42px;
   left: 10%;
   right: 10%;
-  height: 2px;
+  height: 3px;
   background: var(--border-light);
   z-index: 1;
 }
@@ -500,27 +502,23 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   transition: width 0.6s var(--ease-premium);
 }
 
-/* Layout Grid */
+/* Layout Grid - Stacked Layout */
 .layout-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
   width: 100%;
-}
-
-@media (min-width: 900px) {
-  .layout-grid {
-    grid-template-columns: 1fr 320px;
-    align-items: start;
-  }
 }
 
 .wizard-content {
   width: 100%;
-  padding: clamp(1.5rem, 5vw, 3rem);
-  min-height: clamp(300px, 60vh, 550px);
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 4rem);
+  min-height: 500px;
   display: flex;
   flex-direction: column;
+  position: relative;
+  border-radius: 32px;
 }
 
 .step-pane h3 {
@@ -693,13 +691,18 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .wizard-actions {
-  margin-top: auto;
-  padding-top: 2rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
   display: flex;
-  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
 }
 
-.spacer { flex: 1; }
+.btn-sm {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
 
 .start-pulse {
   animation: pulse-border 2s infinite;
@@ -757,9 +760,21 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 .session-summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .session-summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .session-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .summary-card {
@@ -873,8 +888,14 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
     display: flex;
     flex-direction: column;
     padding: 2rem;
-    position: sticky;
-    top: 2rem;
+    width: 100%;
+  }
+
+  .preview-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: start;
   }
 }
 
@@ -887,7 +908,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
 }
 
 .preview-item {
@@ -918,10 +939,18 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 .mini-chip {
   font-size: 0.7rem;
   padding: 0.25rem 0.6rem;
-  background: var(--primary-glow);
+  background: var(--primary-soft);
   color: var(--primary);
+  border: 1px solid var(--primary-border);
   border-radius: 6px;
   font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.mini-chip:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .preview-footer {
@@ -966,7 +995,15 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 @media (max-width: 600px) {
   .wizard-content {
     padding: 1.5rem;
+    padding-top: 5rem; /* Space for top-right buttons */
     min-height: auto;
+  }
+  
+  .wizard-actions {
+    top: 1.25rem;
+    right: 1rem;
+    left: 1rem; /* Full width on mobile if needed, or just keep it right */
+    justify-content: flex-end;
   }
   
   .step-pane h3 {

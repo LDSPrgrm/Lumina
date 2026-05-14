@@ -44,10 +44,14 @@ const vocabItems = computed(() => {
 
       if (correctOption.tokens?.length) {
         correctOption.tokens.forEach((oToken, oIdx) => {
+          // Robust romaji retrieval: check tokens first, then fall back to parent option romaji if it's the only token
+          const tokenRomaji = correctOption.romajiTokens?.[oIdx]?.text || '';
+          const fallbackRomaji = (correctOption.tokens.length === 1) ? (correctOption.romaji || '') : '';
+          
           items.push({
             text: oToken.text,
             reading: oToken.reading,
-            romaji: correctOption.romajiTokens?.[oIdx]?.text || '',
+            romaji: tokenRomaji || fallbackRomaji,
             meaning: oToken.meaning || correctOption.english
           });
         });
@@ -236,19 +240,29 @@ const vocabItems = computed(() => {
           <!-- Vocabulary Breakdown (Footer) -->
           <div v-if="vocabItems.length" class="vocab-breakdown">
             <h4 class="breakdown-title">Vocabulary Breakdown</h4>
-            <div class="vocab-grid">
-              <div 
-                v-for="(item, vIdx) in vocabItems" 
-                :key="'v' + vIdx"
-                class="vocab-item"
-              >
-                <div class="vocab-top">
-                  <span class="vocab-text">{{ item.text }}</span>
-                  <span v-if="item.reading && item.text !== item.reading" class="vocab-reading">{{ item.reading }}</span>
-                </div>
-                <div v-if="item.romaji" class="vocab-middle">{{ item.romaji }}</div>
-                <div class="vocab-bottom">{{ item.meaning }}</div>
-              </div>
+            <div class="vocab-table-wrapper">
+              <table class="vocab-table">
+                <thead>
+                  <tr>
+                    <th>Term</th>
+                    <th>Romaji</th>
+                    <th>Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, vIdx) in vocabItems" :key="'v' + vIdx">
+                    <td class="col-term">
+                      <ruby v-if="item.reading && item.text !== item.reading">
+                        {{ item.text }}
+                        <rt>{{ item.reading }}</rt>
+                      </ruby>
+                      <span v-else>{{ item.text }}</span>
+                    </td>
+                    <td class="col-romaji">{{ item.romaji }}</td>
+                    <td class="col-meaning">{{ item.meaning }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -570,60 +584,76 @@ const vocabItems = computed(() => {
   margin-bottom: 1.25rem;
 }
 
-.vocab-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1.25rem;
-  justify-content: center;
-}
-
-.vocab-item {
-  padding: 1.25rem;
-  background: white;
+.vocab-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: var(--bg-subtle);
   border: 1px solid var(--border-light);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: all 0.3s var(--ease-premium);
-  position: relative;
-  overflow: hidden;
 }
 
-.vocab-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-light);
+.vocab-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
 }
 
-.vocab-top {
-  display: flex;
-  flex-direction: column;
-}
-
-.vocab-text {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.vocab-reading {
-  font-size: 0.75rem;
+.vocab-table th {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
   color: var(--text-subtle);
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.vocab-middle {
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--text-muted);
+.vocab-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  vertical-align: middle;
 }
 
-.vocab-bottom {
-  font-size: 0.9rem;
-  font-weight: 500;
+.vocab-table tr:last-child td {
+  border-bottom: none;
+}
+
+.col-term {
+  font-weight: 700;
   color: var(--text-main);
-  margin-top: 0.25rem;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.col-term ruby {
+  ruby-align: center;
+}
+
+.col-term rt {
+  font-size: 0.6rem;
+  color: var(--primary);
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.col-romaji {
+  color: var(--text-subtle);
+  font-style: italic;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.col-meaning {
+  color: var(--text-main);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.vocab-breakdown {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-light);
 }
 
 .next-pulse {
@@ -696,33 +726,16 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
     margin-bottom: 1.5rem;
   }
 
-  .vocab-grid { 
-    grid-template-columns: 1fr;
-    gap: 0.75rem; 
+  .vocab-table th, .vocab-table td {
+    padding: 0.75rem;
   }
-
-  .vocab-item {
-    padding: 0.85rem 1rem;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    text-align: left;
+  
+  .col-term {
+    font-size: 1rem;
   }
-
-  .vocab-top {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 0.5rem;
-  }
-
-  .vocab-text {
-    font-size: 1.1rem;
-  }
-
-  .vocab-bottom {
-    margin-top: 0;
+  
+  .col-romaji, .col-meaning {
     font-size: 0.85rem;
-    text-align: right;
   }
 }
 </style>
