@@ -55,10 +55,6 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 <template>
   <div class="lumina-dashboard animate-in">
-    <div class="dashboard-header compact">
-      <span class="badge badge-primary">Practice Session</span>
-      <h2 class="section-title">Configure Your Lesson</h2>
-    </div>
 
     <!-- Top Progress Indicator -->
     <div class="progress-wrapper">
@@ -1003,22 +999,31 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 @media (max-width: 600px) {
+  .lumina-dashboard {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+
+  .dashboard-header.compact {
+    margin-bottom: 1rem;
+  }
+
   .wizard-content {
-    padding: 1.5rem;
-    padding-top: 5rem; /* Space for top-right buttons */
+    padding: 1rem;
+    padding-top: 4rem; /* Space for top-right buttons */
     min-height: auto;
   }
   
   .wizard-actions {
-    top: 1.25rem;
+    top: 1rem;
     right: 1rem;
-    left: 1rem; /* Full width on mobile if needed, or just keep it right */
+    left: 1rem;
     justify-content: flex-end;
   }
   
   .step-pane h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
   }
 
   .choice-grid {

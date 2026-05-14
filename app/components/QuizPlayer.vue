@@ -5,6 +5,7 @@ import LoadingView from "~/components/LoadingView.vue";
 import QuestionCard from "~/components/QuestionCard.vue";
 import ResultView from "~/components/ResultView.vue";
 import DiagnosticView from "~/components/DiagnosticView.vue";
+import LuminaToken from "~/components/LuminaToken.vue";
 
 const store = useSettingsStore();
 
@@ -147,6 +148,14 @@ async function handleStartDiagnostic() {
   );
 }
 
+const isWaking = ref(false);
+watch(selectedOption, (newVal, oldVal) => {
+  if (newVal !== null && oldVal === null) {
+    isWaking.value = true;
+    setTimeout(() => { isWaking.value = false; }, 600);
+  }
+});
+
 function handleSelect(index: number) { selectedOption.value = index; }
 function handleSubmit() { quiz.submitAnswer(); }
 function handleNext() { quiz.nextQuestion(); }
@@ -186,7 +195,7 @@ function handleBackToDashboard() {
     <div v-if="!isLoading && questions.length > 0 && !isFinished" class="session-active animate-in">
       <header class="session-nav card-premium glass">
         <div class="nav-left">
-          <button class="btn-icon" @click="handleBackToDashboard">✕</button>
+          <button class="btn-close" @click="handleBackToDashboard">✕</button>
           <div class="session-meta">
             <span class="session-title">{{ quiz.quizTitle.value || 'General Session' }}</span>
             <span class="session-counter">Question {{ currentIndex + 1 }} of {{ questions.length }}</span>
@@ -229,28 +238,61 @@ function handleBackToDashboard() {
           </div>
         </Transition>
       </main>
+
+      <!-- Simple Fixed Bottom Action Bar -->
+      <footer class="quiz-action-bar" :class="{ 'has-submitted': hasSubmitted, 'is-correct': hasSubmitted && selectedOption === currentQuestion?.correctIndex, 'is-wrong': hasSubmitted && selectedOption !== currentQuestion?.correctIndex }">
+        <div class="action-bar-content">
+          <div class="action-buttons">
+            <button 
+              v-if="!hasSubmitted" 
+              class="btn btn-primary btn-xl btn-hero" 
+              :class="{ 
+                'animate-pulse-ready': selectedOption !== null && !isWaking, 
+                'animate-wake-up': isWaking,
+                'is-dormant': selectedOption === null 
+              }"
+              :disabled="selectedOption === null"
+              @click="handleSubmit"
+            >
+              <div class="btn-shimmer shimmer-effect"></div>
+              <span>Check Answer</span>
+              <span class="btn-arrow">➜</span>
+            </button>
+            <button 
+              v-else 
+              class="btn btn-primary btn-xl btn-hero animate-pulse-ready" 
+              @click="handleNext"
+            >
+              <div class="btn-shimmer shimmer-effect"></div>
+              <span>{{ currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question' }}</span>
+              <span class="btn-arrow">{{ currentIndex === questions.length - 1 ? '✨' : '🚀' }}</span>
+            </button>
+          </div>
+        </div>
+      </footer>
     </div>
 
     <!-- Results: Summary -->
     <Transition name="scale-in" mode="out-in">
-      <ResultView
-        v-if="isFinished"
-        key="result"
-        :score="score"
-        :totalQuestions="questions.length"
-        :scorePercentage="scorePercentage"
-        :scoreMessage="scoreMessage"
-        :scoreEmoji="scoreEmoji"
-        :wrongCount="wrongCount"
-        :questions="questions"
-        :userAnswers="userAnswers"
-        :scoreColor="scoreColor"
-        :showReview="showReview"
-        @update:showReview="(v:boolean)=>showReview=v"
-        @newSession="handleNewSession"
-        @restart="handleRestart"
-        @backToDashboard="handleBackToDashboard"
-      />
+      <div v-if="isFinished" class="session-results scroll-y">
+        <ResultView
+          key="result"
+          :score="score"
+          :totalQuestions="questions.length"
+          :scorePercentage="scorePercentage"
+          :scoreMessage="scoreMessage"
+          :scoreEmoji="scoreEmoji"
+          :wrongCount="wrongCount"
+          :questions="questions"
+          :userAnswers="userAnswers"
+          :scoreColor="scoreColor"
+          :showReview="showReview"
+          @update:showReview="(v:boolean)=>showReview=v"
+          @newSession="handleNewSession"
+          @restart="handleRestart"
+          @backToDashboard="handleBackToDashboard"
+        />
+      </div>
     </Transition>
   </div>
 </template>
@@ -260,28 +302,30 @@ function handleBackToDashboard() {
   width: 100%;
   max-width: none;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: clamp(1rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem);
+  overflow: hidden;
+  background-color: var(--bg-page);
 }
 
 .session-active {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .session-nav {
   display: grid;
   grid-template-columns: minmax(160px, 240px) 1fr minmax(120px, 240px);
   align-items: center;
-  padding: 0.75rem 1.5rem;
-  position: sticky;
-  top: 1rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--border-main);
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .nav-left {
@@ -290,7 +334,7 @@ function handleBackToDashboard() {
   gap: 1rem;
 }
 
-.btn-icon {
+.btn-close {
   width: 36px;
   height: 36px;
   border-radius: 10px;
@@ -302,9 +346,10 @@ function handleBackToDashboard() {
   cursor: pointer;
   color: var(--text-muted);
   transition: all 0.2s ease;
+  font-weight: 800;
 }
 
-.btn-icon:hover {
+.btn-close:hover {
   background: var(--bg-subtle);
   color: var(--error);
 }
@@ -386,9 +431,121 @@ function handleBackToDashboard() {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.5rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fixed Bottom Action Bar */
+.quiz-action-bar {
+  flex-shrink: 0;
+  padding: 0.75rem 2rem;
+  z-index: 1000;
+  border-top: 1px solid var(--border-main);
+  display: flex;
+  justify-content: center;
+  transition: all 0.4s var(--ease-premium);
+  background: white;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.quiz-action-bar.is-correct {
+  background: rgba(240, 253, 244, 0.98);
+  border-top: 2px solid var(--success);
+}
+
+.quiz-action-bar.is-wrong {
+  background: rgba(254, 242, 242, 0.98);
+  border-top: 2px solid var(--error);
+}
+
+.action-bar-content {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-buttons {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Hero Button Styling */
+.btn-hero {
+  padding: 0.8rem 2.5rem;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--primary), #00c071);
+  box-shadow: 
+    0 4px 15px rgba(0, 220, 130, 0.3),
+    0 10px 20px -10px rgba(0, 0, 0, 0.2);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  transition: all 0.4s var(--ease-premium);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-hero.is-dormant {
+  background: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: none;
+  opacity: 0.5;
+  transform: scale(0.96);
+  filter: grayscale(1);
+}
+
+.btn-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.btn-hero:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 8px 25px rgba(0, 220, 130, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-hero:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-hero:disabled {
+  cursor: not-allowed;
+}
+
+.btn-arrow {
+  transition: transform 0.3s var(--ease-premium);
+  font-size: 1.25rem;
+}
+
+.btn-hero:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.btn-xl {
+  min-width: 240px;
 }
 
 /* Transitions */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s var(--ease-premium);
+}
+
+.slide-up-enter-from { opacity: 0; transform: translateY(30px) scale(0.95); }
+.slide-up-leave-to { opacity: 0; transform: translateY(-30px) scale(0.95); }
+
 .slide-fade-enter-active,
 .slide-fade-leave-active {
   transition: all 0.4s var(--ease-premium);
@@ -420,11 +577,23 @@ function handleBackToDashboard() {
   .session-title { max-width: 140px; }
 }
 
+@media (max-width: 768px) {
+  .action-bar-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  .action-buttons { width: 100%; }
+  .btn-xl { width: 100%; min-width: 0; }
+  .quiz-body { padding: 1.5rem 1rem; }
+  .quiz-action-bar { padding: 0.85rem 1.25rem; }
+}
+
 @media (max-width: 640px) {
-  .session-active { gap: 1.5rem; }
-  .session-nav { border-radius: var(--radius-md); top: 0.5rem; padding: 0.75rem 1rem; }
+  .session-active { gap: 0.5rem; }
+  .session-nav { border-radius: var(--radius-md); top: 0.25rem; padding: 0.5rem 0.75rem; position: relative;}
   .pill span:not(.icon) { display: none; }
-  .pill { padding: 0.35rem 0.6rem; }
+  .pill { padding: 0.25rem 0.5rem; }
   .session-title { max-width: 100px; }
 }
 </style>

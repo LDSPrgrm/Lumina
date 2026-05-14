@@ -242,15 +242,15 @@ function handleStart() {
 
 @media (max-width: 640px) {
   .diagnostic-onboarding {
-    padding: 1.5rem 1rem;
-    margin: 1rem auto;
-    max-width: 96%;
+    padding: 1rem;
+    margin: 0.5rem auto;
+    max-width: 100%;
   }
   
   .form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .title {

@@ -75,6 +75,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
   min-height: 400px;
   width: 100%;
 }

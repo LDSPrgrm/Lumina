@@ -62,19 +62,6 @@ function handleRetake(session: any) {
         <HistoryView v-if="store.currentTab === 'history'" @retake="handleRetake" />
       </div>
     </main>
-
-    <footer class="app-footer glass">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <span class="brand-dot"></span>
-          <span class="brand-text">Lumina AI</span>
-        </div>
-        <p class="footer-copy">&copy; 2026 Linguist Pro — Personalize your language journey.</p>
-        <div class="footer-links">
-          <span class="footer-tag">Powered by Gemini Flash</span>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -225,60 +212,6 @@ main.container {
   color: var(--text-subtle);
 }
 
-.app-footer {
-  margin-top: auto;
-  padding: 3rem 1rem;
-  border-top: 1px solid var(--border-light);
-}
-
-.footer-content {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.brand-dot {
-  width: 10px;
-  height: 10px;
-  background: var(--primary);
-  border-radius: 50%;
-  box-shadow: 0 0 15px var(--primary-glow);
-}
-
-.brand-text {
-  font-weight: 900;
-  font-size: 1.25rem;
-  letter-spacing: -0.03em;
-  color: var(--text-main);
-}
-
-.footer-copy {
-  color: var(--text-subtle);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.footer-tag {
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  background: var(--bg-subtle);
-  padding: 0.35rem 0.85rem;
-  border-radius: 99px;
-  border: 1px solid var(--border-light);
-}
-
 @media (max-width: 640px) {
   .onboarding {
     padding: 1.5rem;
@@ -299,10 +232,6 @@ main.container {
   .pill-btn {
     flex: 1;
     justify-content: center;
-  }
-  
-  .app-footer {
-    display: none;
   }
 }
 </style>

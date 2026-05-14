@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { QuizQuestion } from "~/utils/gemini";
+import LuminaToken from "~/components/LuminaToken.vue";
 
 const props = defineProps<{
   question: QuizQuestion;
@@ -95,42 +96,16 @@ const vocabItems = computed(() => {
     <div class="question-body">
       <div v-if="props.question?.questionTokens?.length" class="token-container">
         <h3 class="question-main">
-          <span
+          <LuminaToken
             v-for="(token, tIdx) in props.question.questionTokens"
             :key="tIdx"
-            class="token-wrapper"
-          >
-            <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-              <ruby>
-                {{ token.text }}
-                <rt>{{ token.reading }}</rt>
-              </ruby>
-              <span class="token-tooltip">{{ token.meaning }}</span>
-            </span>
-          </span>
+            :text="token.text"
+            :reading="token.reading"
+            :romaji="props.question.questionRomajiTokens?.[tIdx]?.text"
+            :meaning="token.meaning"
+            :colorIndex="token.colorIndex"
+          />
         </h3>
-        
-        <div v-if="props.question.questionRomajiTokens?.length" class="romaji-line">
-          <span
-            v-for="(token, tIdx) in props.question.questionRomajiTokens"
-            :key="'qr' + tIdx"
-            class="token-simple"
-            :class="`token-${token.colorIndex}`"
-          >
-            {{ token.text }}
-          </span>
-        </div>
-        
-        <div v-if="props.question.questionEnglishTokens?.length" class="english-line">
-          <span
-            v-for="(token, tIdx) in props.question.questionEnglishTokens"
-            :key="'qe' + tIdx"
-            class="token-simple"
-            :class="`token-${token.colorIndex}`"
-          >
-            {{ token.text }}
-          </span>
-        </div>
       </div>
       
       <h3 v-else class="question-fallback">{{ props.question?.question }}</h3>
@@ -142,14 +117,20 @@ const vocabItems = computed(() => {
         v-for="(option, index) in props.question?.options"
         :key="index"
         class="option-card card-interactive"
+        role="radio"
+        :aria-checked="props.selectedOption === index"
+        :tabindex="hasSubmitted ? -1 : 0"
         :class="{
           active: props.selectedOption === index,
           correct: hasSubmitted && index === props.question?.correctIndex,
           wrong: hasSubmitted && props.selectedOption === index && index !== props.question?.correctIndex,
           disabled: hasSubmitted,
-          faded: hasSubmitted && index !== props.question?.correctIndex && props.selectedOption !== index
+          faded: hasSubmitted && index !== props.question?.correctIndex && props.selectedOption !== index,
+          'animate-pop': props.selectedOption === index && !hasSubmitted,
+          'animate-success-ping': hasSubmitted && index === props.question?.correctIndex
         }"
         @click="!hasSubmitted && emit('select', index)"
+        @keydown.enter.space.prevent="!hasSubmitted && emit('select', index)"
       >
         <div class="option-indicator">
           <span class="letter">{{ letters[index] }}</span>
@@ -157,42 +138,15 @@ const vocabItems = computed(() => {
         
         <div class="option-content">
           <div class="phrase-row">
-            <span
+            <LuminaToken
               v-for="(token, tIdx) in option.tokens"
               :key="tIdx"
-              class="token-wrapper"
-            >
-              <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-                <ruby v-if="token.reading && token.text !== token.reading">
-                  {{ token.text }}
-                  <rt>{{ token.reading }}</rt>
-                </ruby>
-                <span v-else>{{ token.text }}</span>
-                <span class="token-tooltip">{{ token.meaning }}</span>
-              </span>
-            </span>
-          </div>
-          
-          <div v-if="option.romajiTokens?.length" class="romaji-row">
-            <span
-              v-for="(token, tIdx) in option.romajiTokens"
-              :key="'r' + tIdx"
-              class="token-simple"
-              :class="`token-${token.colorIndex}`"
-            >
-              {{ token.text }}&nbsp;
-            </span>
-          </div>
-          
-          <div v-if="option.englishTokens?.length" class="english-row">
-            <span
-              v-for="(token, tIdx) in option.englishTokens"
-              :key="'e' + tIdx"
-              class="token-simple"
-              :class="`token-${token.colorIndex}`"
-            >
-              {{ token.text }}&nbsp;
-            </span>
+              :text="token.text"
+              :reading="token.reading"
+              :romaji="option.romajiTokens?.[tIdx]?.text"
+              :meaning="token.meaning"
+              :colorIndex="token.colorIndex"
+            />
           </div>
         </div>
 
@@ -203,70 +157,41 @@ const vocabItems = computed(() => {
       </div>
     </div>
 
-    <!-- Actions & Explanation -->
-    <div class="card-footer">
-      <Transition name="slide-up" mode="out-in">
-        <div v-if="!hasSubmitted" key="check" class="action-bar">
-          <button
-            class="btn btn-primary w-full"
-            :disabled="props.selectedOption === null"
-            @click="handleSubmit"
-          >
-            Check Answer
-          </button>
+    <!-- Explanation & Vocab (Only visible after submission) -->
+    <div v-if="hasSubmitted" class="card-footer">
+      <div class="explanation-container animate-in">
+        <div class="explanation-body" :class="props.selectedOption === props.question?.correctIndex ? 'success-theme' : 'error-theme'">
+          <p class="explanation-text">{{ props.question?.explanation }}</p>
         </div>
 
-        <div v-else key="explanation" class="explanation-container animate-in">
-          <!-- Status & Next -->
-          <div class="correction-header">
-            <div class="status-box" :class="props.selectedOption === props.question?.correctIndex ? 'success' : 'error'">
-              <span class="status-icon">
-                {{ props.selectedOption === props.question?.correctIndex ? '✓' : '×' }}
-              </span>
-              <span class="status-msg">
-                {{ props.selectedOption === props.question?.correctIndex ? 'Brilliant!' : 'Not quite right' }}
-              </span>
-            </div>
-            <button class="btn btn-primary next-pulse" @click="handleNext">
-              Next Question
-            </button>
-          </div>
-
-          <!-- Explanation Text -->
-          <div class="explanation-body">
-            <p>{{ props.question?.explanation }}</p>
-          </div>
-
-          <!-- Vocabulary Breakdown (Footer) -->
-          <div v-if="vocabItems.length" class="vocab-breakdown">
-            <h4 class="breakdown-title">Vocabulary Breakdown</h4>
-            <div class="vocab-table-wrapper">
-              <table class="vocab-table">
-                <thead>
-                  <tr>
-                    <th>Term</th>
-                    <th>Romaji</th>
-                    <th>Meaning</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item, vIdx) in vocabItems" :key="'v' + vIdx">
-                    <td class="col-term">
-                      <ruby v-if="item.reading && item.text !== item.reading">
-                        {{ item.text }}
-                        <rt>{{ item.reading }}</rt>
-                      </ruby>
-                      <span v-else>{{ item.text }}</span>
-                    </td>
-                    <td class="col-romaji">{{ item.romaji }}</td>
-                    <td class="col-meaning">{{ item.meaning }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        <!-- Vocabulary Breakdown -->
+        <div v-if="vocabItems.length" class="vocab-breakdown">
+          <h4 class="breakdown-title">Vocabulary Breakdown</h4>
+          <div class="vocab-table-wrapper">
+            <table class="vocab-table">
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, vIdx) in vocabItems" :key="'v' + vIdx">
+                  <td class="col-term">
+                    <LuminaToken
+                      :text="item.text"
+                      :reading="item.reading"
+                      :romaji="item.romaji"
+                      :meaning="item.meaning"
+                    />
+                  </td>
+                  <td class="col-meaning">{{ item.meaning }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-      </Transition>
+      </div>
     </div>
   </div>
 </template>
@@ -275,15 +200,15 @@ const vocabItems = computed(() => {
 .lumina-question-card {
   width: 100%;
   max-width: 800px;
-  margin: 2rem auto;
-  padding: 2.5rem;
+  margin: 1rem auto;
+  padding: 1.5rem 2rem;
   background: white;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   text-align: center;
 }
 
@@ -296,64 +221,18 @@ const vocabItems = computed(() => {
 .question-main {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0 0.25rem;
-  font-size: clamp(1.4rem, 5vw, 2.25rem);
+  font-size: clamp(1.35rem, 4.5vw, 2rem);
   font-weight: 850;
-  line-height: 1.8; /* Increased for ruby/furigana spacing */
-  margin-bottom: 2rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
 .token-container {
   display: flex;
   flex-direction: column;
-}
-
-.token-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.token-premium {
-  position: relative;
-  cursor: help;
-  padding: 0.2rem 0.35rem;
-  border-radius: 8px;
-  font-weight: 850;
-  transition: all 0.2s ease;
-  display: inline-block;
-}
-
-.token-premium:hover {
-  background: var(--bg-subtle);
-}
-
-.token-tooltip {
-  visibility: hidden;
-  position: absolute;
-  bottom: 120%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-5px);
-  background: var(--text-main);
-  color: white;
-  padding: 0.5rem 0.85rem;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  z-index: 1000;
-  opacity: 0;
-  box-shadow: var(--shadow-lg);
-  transition: all 0.2s var(--ease-premium);
-  pointer-events: none;
-}
-
-.token-premium:hover .token-tooltip,
-.token-premium:focus .token-tooltip,
-.token-premium:focus-within .token-tooltip {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(-10px);
 }
 
 @media (max-width: 900px) {
@@ -371,26 +250,15 @@ const vocabItems = computed(() => {
   }
 }
 
-.romaji-line, .english-line {
+.romaji-line {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0 0.5rem;
   font-size: 1.1rem;
-}
-
-.romaji-line {
   color: var(--text-muted);
   font-style: italic;
   margin-top: 0.5rem;
-}
-
-.english-line {
-  color: var(--text-subtle);
-  margin-top: 0.25rem;
-}
-
-.token-simple {
-  font-weight: 600;
 }
 
 .question-fallback {
@@ -409,8 +277,8 @@ const vocabItems = computed(() => {
 .option-card {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1.5rem;
+  gap: 1rem;
+  padding: 1.25rem;
   text-align: left;
 }
 
@@ -422,11 +290,16 @@ const vocabItems = computed(() => {
 .option-card.correct {
   border-color: var(--success);
   background: var(--success-bg);
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
 }
 
 .option-card.wrong {
   border-color: var(--error);
   background: var(--error-bg);
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .option-card.disabled {
@@ -434,8 +307,19 @@ const vocabItems = computed(() => {
 }
 
 .option-card.faded {
-  opacity: 0.5;
-  filter: grayscale(0.5);
+  opacity: 0.4;
+  filter: grayscale(0.8);
+}
+
+/* Ensure tokens remain interactive even in disabled state */
+.option-card.disabled .phrase-row {
+  pointer-events: auto;
+}
+
+/* Ensure tokens remain legible against colored background states */
+.option-card.correct .phrase-row,
+.option-card.wrong .phrase-row {
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 
 .option-indicator .letter {
@@ -481,19 +365,18 @@ const vocabItems = computed(() => {
   font-size: 1.35rem;
   font-weight: 750;
   color: var(--text-main);
-  line-height: 1.7; /* Increased for ruby spacing */
+  line-height: 1.7;
 }
 
-.romaji-row, .english-row {
+.romaji-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0 0.45rem;
   font-size: 0.95rem;
   margin-top: 0.15rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
-
-.romaji-row { color: var(--text-muted); font-style: italic; }
-.english-row { color: var(--text-subtle); }
 
 .feedback-icon {
   font-size: 1.5rem;
@@ -506,113 +389,98 @@ const vocabItems = computed(() => {
 }
 
 .explanation-container {
-  background: var(--bg-subtle);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
   border: 1px solid var(--border-light);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
 }
-
-.correction-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.status-box {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.status-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 1.2rem;
-}
-
-.status-box.success .status-icon {
-  background: var(--success);
-  color: white;
-}
-
-.status-box.error .status-icon {
-  background: var(--error);
-  color: white;
-}
-
-.status-msg {
-  font-weight: 850;
-  font-size: 1.25rem;
-}
-
-.status-box.success .status-msg { color: var(--success); }
-.status-box.error .status-msg { color: var(--error); }
 
 .explanation-body {
   font-size: 1.15rem;
-  line-height: 1.7;
+  line-height: 1.8;
   color: var(--text-main);
-  margin-bottom: 2rem;
-  padding: 1.25rem;
-  background: white;
-  border-radius: 14px;
-  border-left: 5px solid var(--primary);
-  box-shadow: var(--shadow-sm);
+  background: var(--bg-subtle);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+
+.explanation-body.success-theme {
+  border-left: 6px solid var(--success);
+}
+
+.explanation-body.error-theme {
+  border-left: 6px solid var(--error);
+}
+
+.explanation-text {
+  padding: 2rem;
+  margin: 0;
 }
 
 /* Vocab Breakdown */
 .vocab-breakdown {
   margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-light);
+  text-align: left;
 }
 
 .breakdown-title {
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.breakdown-title::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 1.2em;
+  background: var(--primary);
+  border-radius: 99px;
 }
 
 .vocab-table-wrapper {
-  overflow-x: auto;
-  border-radius: 12px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  background: white;
+  border: 1px solid var(--border-main);
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
 .vocab-table {
   width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.95rem;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .vocab-table th {
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.02);
-  color: var(--text-subtle);
-  font-size: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-light);
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border-main);
 }
 
 .vocab-table td {
-  padding: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
   vertical-align: middle;
+  transition: all 0.2s ease;
+}
+
+.vocab-table tr:hover td {
+  background: var(--primary-soft);
 }
 
 .vocab-table tr:last-child td {
@@ -620,62 +488,43 @@ const vocabItems = computed(() => {
 }
 
 .col-term {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-main);
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   white-space: nowrap;
-}
-
-.col-term ruby {
-  ruby-align: center;
-}
-
-.col-term rt {
-  font-size: 0.6rem;
-  color: var(--primary);
-  opacity: 0.8;
-  font-weight: 500;
 }
 
 .col-romaji {
   color: var(--text-subtle);
   font-style: italic;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
 .col-meaning {
   color: var(--text-main);
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.vocab-breakdown {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-light);
+  font-weight: 600;
+  line-height: 1.5;
+  font-size: 1rem;
 }
 
 .next-pulse {
   animation: pulse-border 2s infinite;
 }
 
-/* Ruby */
-ruby { ruby-position: over; }
-rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
-
 @media (max-width: 900px) {
   .lumina-question-card { 
     margin: 1rem auto;
     padding: 1.75rem; 
   }
-  .question-main { margin-bottom: 1.5rem; }
 }
 
 @media (max-width: 640px) {
   .lumina-question-card { 
-    padding: 1.25rem 1rem;
-    gap: 1.25rem;
+    padding: 1rem;
+    gap: 1rem;
+    margin: 0 auto;
   }
 
   .question-main {
@@ -700,34 +549,25 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
     line-height: 1.6;
   }
 
-  .romaji-row, .english-row {
+  .romaji-row {
     font-size: 0.85rem;
   }
 
   .explanation-container {
-    padding: 1rem;
-  }
-
-  .correction-header { 
-    flex-direction: column; 
-    gap: 1rem; 
-    align-items: center;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .status-msg {
-    font-size: 1.1rem;
+    padding: 1.25rem;
   }
 
   .explanation-body {
     font-size: 1rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .explanation-text {
+    padding: 1.25rem;
   }
 
   .vocab-table th, .vocab-table td {
-    padding: 0.75rem;
+    padding: 1rem 0.75rem;
   }
   
   .col-term {
