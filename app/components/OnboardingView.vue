@@ -127,8 +127,9 @@ const handleFinish = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;
-  padding: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1rem;
 }
 
 .onboarding-card {

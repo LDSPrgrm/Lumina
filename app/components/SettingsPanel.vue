@@ -11,13 +11,7 @@ const saveSettings = () => {
   setTimeout(() => { saved.value = false; }, 2000);
 };
 
-const resetDiagnostic = () => {
-  if (confirm("This will reset your proficiency level and ask you to take the diagnostic test again. Continue?")) {
-    store.isDiagnosed = false;
-    localStorage.removeItem('lumina_is_diagnosed');
-    store.currentTab = 'quiz';
-  }
-};
+
 </script>
 
 <template>
@@ -103,11 +97,7 @@ const resetDiagnostic = () => {
       </div>
 
       <!-- Advanced / Reset -->
-      <div v-if="store.isDiagnosed" class="advanced-settings">
-        <button class="btn btn-outline btn-block text-error" @click="resetDiagnostic">
-          Reset Proficiency & Retake Diagnostic
-        </button>
-      </div>
+
     </div>
   </div>
 </template>
@@ -120,6 +110,9 @@ const resetDiagnostic = () => {
   padding: 1.5rem;
   background: var(--bg-main);
   border-radius: var(--radius-lg);
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .panel-header {

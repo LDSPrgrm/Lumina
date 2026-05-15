@@ -1,4 +1,4 @@
-import { generateQuiz, generateDiagnosticQuiz, type QuizQuestion } from "~/utils/gemini";
+import { generateQuiz, type QuizQuestion } from "~/utils/gemini";
 
 // ── Constants (extracted from QuizPlayer) ────────────────────────────
 export const levels = [
@@ -94,7 +94,7 @@ export function useQuiz() {
   const quizTitle = ref('');
   const userAnswers = ref<(number | null)[]>([]);
 
-  const isDiagnostic = ref(false);
+
 
   const currentQuestion = computed(() => questions.value[currentIndex.value]);
   const progress = computed(() => ((currentIndex.value + 1) / questions.value.length) * 100);
@@ -102,7 +102,15 @@ export function useQuiz() {
     if (questions.value.length === 0) return 0;
     return Math.round((score.value / questions.value.length) * 100);
   });
-  const wrongCount = computed(() => questions.value.length - score.value);
+  const wrongCount = computed(() => {
+    let count = 0;
+    userAnswers.value.forEach((ans, idx) => {
+      if (ans !== null && ans !== questions.value[idx]?.correctIndex) {
+        count++;
+      }
+    });
+    return count;
+  });
 
   const scoreMessage = computed(() => {
     const pct = scorePercentage.value;
@@ -134,7 +142,7 @@ export function useQuiz() {
     currentIndex.value = 0;
     score.value = 0;
     isFinished.value = false;
-    isDiagnostic.value = false;
+
     selectedOption.value = null;
     hasSubmitted.value = false;
     quizTitle.value = '';
@@ -158,7 +166,6 @@ export function useQuiz() {
     localStorage.setItem('lumina_current_quiz', JSON.stringify({
       questions: questions.value,
       title: quizTitle.value,
-      isDiagnostic: isDiagnostic.value
     }));
   }
 
@@ -170,7 +177,7 @@ export function useQuiz() {
         const data = JSON.parse(saved);
         questions.value = data.questions;
         quizTitle.value = data.title;
-        isDiagnostic.value = data.isDiagnostic || false;
+
         return true;
       } catch (e) {
         console.error('Failed to parse saved quiz', e);
@@ -215,26 +222,7 @@ export function useQuiz() {
     return true;
   }
   
-  async function startDiagnosticQuiz(apiKey: string, targetLanguage: string, nativeLanguage: string) {
-    if (!apiKey) return false;
 
-    isLoading.value = true;
-    resetState();
-    isDiagnostic.value = true;
-
-    try {
-      questions.value = await generateDiagnosticQuiz(apiKey, targetLanguage, nativeLanguage);
-      quizTitle.value = `Diagnostic: ${targetLanguage}`;
-      saveQuiz();
-    } catch (error) {
-      alert("Failed to generate diagnostic quiz. Check your API key or connection.");
-      console.error(error);
-    } finally {
-      isLoading.value = false;
-    }
-
-    return true;
-  }
 
   function loadQuiz(data: { questions: QuizQuestion[], title: string }) {
     questions.value = data.questions;
@@ -265,11 +253,11 @@ export function useQuiz() {
   }
 
   return {
-    questions, currentIndex, score, isLoading, isFinished, isDiagnostic,
+    questions, currentIndex, score, isLoading, isFinished, 
     selectedOption, hasSubmitted, currentQuestion, progress,
     scorePercentage, wrongCount, scoreMessage, scoreEmoji, scoreColor,
     quizTitle, userAnswers,
-    resetState, restartQuiz, startQuiz, startDiagnosticQuiz, submitAnswer, nextQuestion,
+    resetState, restartQuiz, startQuiz, submitAnswer, nextQuestion,
     loadSavedQuiz, saveQuiz, loadQuiz
   };
 }

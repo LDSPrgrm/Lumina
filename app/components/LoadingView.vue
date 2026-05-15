@@ -72,12 +72,14 @@ onMounted(() => {
 
 <style scoped>
 .loading-container {
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  min-height: 400px;
-  width: 100%;
+  z-index: 9999;
+  background: var(--bg-page);
+  padding: 1rem;
 }
 
 .loading-content {

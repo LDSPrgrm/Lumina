@@ -46,6 +46,14 @@
   --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-fast: 150ms;
   --duration-main: 300ms;
+
+  /* Token Palette (High Contrast) */
+  --token-0: #3b82f6;
+  --token-1: #8b5cf6;
+  --token-2: #ec4899;
+  --token-3: #f97316;
+  --token-4: #10b981;
+  --token-5: #06b6d4;
 }
 
 /* ─── Base Styles ─────────────────────────────────────────── */
@@ -54,8 +62,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
+  height: 100%;
   margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
   /* Premium Mesh Gradient + Grid (Stripe/AlgoVision Style) */
@@ -280,6 +294,29 @@ h1, h2, h3, h4 {
   opacity: 0;
 }
 
+/* ─── Scale In Transition ───────────────────────────────────── */
+.scale-in-enter-active,
+.scale-in-leave-active {
+  transition: all 0.5s var(--ease-premium);
+}
+
+.scale-in-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.scale-in-leave-to {
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+/* ─── Pulse Border Keyframes ────────────────────────────────── */
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(0, 220, 130, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 220, 130, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 220, 130, 0); }
+}
+
 /* ─── Badge Styles ──────────────────────────────────────────── */
 .badge {
   padding: 0.25rem 0.75rem;
@@ -294,10 +331,37 @@ h1, h2, h3, h4 {
 .badge-success { background: var(--success-bg); color: var(--success); }
 .badge-error { background: var(--error-bg); color: var(--error); }
 
-/* ─── Token Palette (High Contrast) ────────────────────────── */
-.token-0 { color: #3b82f6; } /* Blue */
-.token-1 { color: #8b5cf6; } /* Violet */
-.token-2 { color: #ec4899; } /* Pink */
-.token-3 { color: #f97316; } /* Orange */
-.token-4 { color: #10b981; } /* Emerald */
-.token-5 { color: #06b6d4; } /* Cyan */
+
+
+/* ─── Token Palette (Utility Classes) ────────────────────────── */
+.token-0 { color: var(--token-0); }
+.token-1 { color: var(--token-1); }
+.token-2 { color: var(--token-2); }
+.token-3 { color: var(--token-3); }
+.token-4 { color: var(--token-4); }
+.token-5 { color: var(--token-5); }
+
+/* ─── Premium Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subtle);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-main) transparent;
+}

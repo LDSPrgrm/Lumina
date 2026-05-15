@@ -82,7 +82,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
     <div class="layout-grid">
       <!-- Main Wizard Content -->
-      <main class="wizard-content card-premium">
+      <div class="wizard-content card-premium">
         <!-- Wizard Actions (Relocated to top right) -->
         <div class="wizard-actions">
           <button 
@@ -109,241 +109,243 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
           </button>
         </div>
 
-        <Transition name="fade" mode="out-in">
-          <div :key="activeTab" class="tab-view">
-            <!-- Steps handled by v-if blocks -->
-            <!-- Step 0: Identity -->
-            <div v-if="activeTab === 0" class="step-pane">
-              <h3>Where are we starting?</h3>
-              <div class="form-stack">
-                <div class="form-group">
-                  <label>Native Language</label>
-                  <input 
-                    :value="model.nativeLanguage" 
-                    @input="update('nativeLanguage', ($event.target as HTMLInputElement).value)" 
-                    type="text" 
-                    class="input-premium" 
-                    placeholder="e.g. English" 
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Target Language</label>
-                  <input 
-                    :value="model.targetLanguage" 
-                    @input="update('targetLanguage', ($event.target as HTMLInputElement).value)" 
-                    type="text" 
-                    class="input-premium" 
-                    placeholder="e.g. Japanese" 
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Regional Dialect <small>(Optional)</small></label>
-                  <input 
-                    :value="model.regionalDialect" 
-                    @input="update('regionalDialect', ($event.target as HTMLInputElement).value)" 
-                    type="text" 
-                    class="input-premium" 
-                    placeholder="e.g. Kansai-ben, Mexican Spanish" 
-                  />
+        <div class="wizard-scroll-body">
+          <Transition name="fade" mode="out-in">
+            <div :key="activeTab" class="tab-view">
+              <!-- Steps handled by v-if blocks -->
+              <!-- Step 0: Identity -->
+              <div v-if="activeTab === 0" class="step-pane">
+                <h3>Where are we starting?</h3>
+                <div class="form-stack">
+                  <div class="form-group">
+                    <label>Native Language</label>
+                    <input 
+                      :value="model.nativeLanguage" 
+                      @input="update('nativeLanguage', ($event.target as HTMLInputElement).value)" 
+                      type="text" 
+                      class="input-premium" 
+                      placeholder="e.g. English" 
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Target Language</label>
+                    <input 
+                      :value="model.targetLanguage" 
+                      @input="update('targetLanguage', ($event.target as HTMLInputElement).value)" 
+                      type="text" 
+                      class="input-premium" 
+                      placeholder="e.g. Japanese" 
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Regional Dialect <small>(Optional)</small></label>
+                    <input 
+                      :value="model.regionalDialect" 
+                      @input="update('regionalDialect', ($event.target as HTMLInputElement).value)" 
+                      type="text" 
+                      class="input-premium" 
+                      placeholder="e.g. Kansai-ben, Mexican Spanish" 
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Step 1: Aspiration -->
-            <div v-else-if="activeTab === 1" class="step-pane">
-              <h3>Define your level & focus</h3>
-              <div class="form-stack">
-                <div class="form-group">
-                  <label>Current Proficiency</label>
-                  <div class="choice-grid">
-                    <div 
-                      v-for="l in levels" 
-                      :key="l"
-                      class="card-interactive choice-card"
-                      :class="{ active: model.proficiencyLevel === l }"
-                      @click="update('proficiencyLevel', l)"
-                    >
-                      <div class="choice-indicator"></div>
-                      <span>{{ l }}</span>
+              <!-- Step 1: Aspiration -->
+              <div v-else-if="activeTab === 1" class="step-pane">
+                <h3>Define your level & focus</h3>
+                <div class="form-stack">
+                  <div class="form-group">
+                    <label>Current Proficiency</label>
+                    <div class="choice-grid">
+                      <div 
+                        v-for="l in levels" 
+                        :key="l"
+                        class="card-interactive choice-card"
+                        :class="{ active: model.proficiencyLevel === l }"
+                        @click="update('proficiencyLevel', l)"
+                      >
+                        <div class="choice-indicator"></div>
+                        <span>{{ l }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Skill Focus</label>
+                    <div class="chip-row">
+                      <button 
+                        v-for="f in focuses" 
+                        :key="f"
+                        class="btn btn-outline chip"
+                        :class="{ active: model.focusArea === f }"
+                        @click="update('focusArea', f)"
+                      >
+                        {{ f }}
+                      </button>
                     </div>
                   </div>
                 </div>
-                
-                <div class="form-group">
-                  <label>Skill Focus</label>
-                  <div class="chip-row">
-                    <button 
-                      v-for="f in focuses" 
-                      :key="f"
-                      class="btn btn-outline chip"
-                      :class="{ active: model.focusArea === f }"
-                      @click="update('focusArea', f)"
-                    >
-                      {{ f }}
-                    </button>
+              </div>
+
+              <!-- Step 2: Scope -->
+              <div v-else-if="activeTab === 2" class="step-pane">
+                <h3>What's today's topic?</h3>
+                <div class="form-stack">
+                  <div class="form-group">
+                    <label>Session Theme</label>
+                    <input 
+                      :value="model.topic" 
+                      @input="update('topic', ($event.target as HTMLInputElement).value)" 
+                      type="text" 
+                      class="input-premium" 
+                      placeholder="e.g. Booking a hotel, Casual dinner conversation" 
+                    />
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Learning Depth</label>
+                    <div class="choice-grid cols-2">
+                      <div 
+                        v-for="d in depths" 
+                        :key="d"
+                        class="card-interactive choice-card compact"
+                        :class="{ active: model.explanationDepth === d }"
+                        @click="update('explanationDepth', d)"
+                      >
+                        <span>{{ d }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="label-with-value">
+                      <label>Questions</label>
+                      <span class="badge badge-primary">{{ model.quizLength }}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="1" max="20" 
+                      :value="model.quizLength" 
+                      @input="update('quizLength', parseInt(($event.target as HTMLInputElement).value))"
+                      class="slider-premium"
+                    />
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Step 2: Scope -->
-            <div v-else-if="activeTab === 2" class="step-pane">
-              <h3>What's today's topic?</h3>
-              <div class="form-stack">
-                <div class="form-group">
-                  <label>Session Theme</label>
-                  <input 
-                    :value="model.topic" 
-                    @input="update('topic', ($event.target as HTMLInputElement).value)" 
-                    type="text" 
-                    class="input-premium" 
-                    placeholder="e.g. Booking a hotel, Casual dinner conversation" 
-                  />
+              <!-- Step 3: Style -->
+              <div v-else-if="activeTab === 3" class="step-pane">
+                <h3>Fine-tune the delivery</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Format</label>
+                    <select :value="model.quizFormat" @change="update('quizFormat', ($event.target as HTMLSelectElement).value)" class="input-premium">
+                      <option v-for="f in formats" :key="f" :value="f">{{ f }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Tone</label>
+                    <select :value="model.tone" @change="update('tone', ($event.target as HTMLSelectElement).value)" class="input-premium">
+                      <option v-for="t in tones" :key="t" :value="t">{{ t }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Scenario</label>
+                    <select :value="model.learningScenario" @change="update('learningScenario', ($event.target as HTMLSelectElement).value)" class="input-premium">
+                      <option v-for="s in scenarios" :key="s" :value="s">{{ s }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Difficulty</label>
+                    <select :value="model.difficultyMode" @change="update('difficultyMode', ($event.target as HTMLSelectElement).value)" class="input-premium">
+                      <option v-for="m in modes" :key="m" :value="m">{{ m }}</option>
+                    </select>
+                  </div>
                 </div>
                 
-                <div class="form-group">
-                  <label>Learning Depth</label>
-                  <div class="choice-grid cols-2">
-                    <div 
-                      v-for="d in depths" 
-                      :key="d"
-                      class="card-interactive choice-card compact"
-                      :class="{ active: model.explanationDepth === d }"
-                      @click="update('explanationDepth', d)"
-                    >
-                      <span>{{ d }}</span>
+                <label class="toggle-card card-interactive" :class="{ active: model.includePhonetics }">
+                  <input 
+                    type="checkbox" 
+                    :checked="model.includePhonetics" 
+                    @change="update('includePhonetics', ($event.target as HTMLInputElement).checked)"
+                    class="hidden-input"
+                  />
+                  <div class="toggle-content">
+                    <div class="toggle-icon">🏮</div>
+                    <div class="toggle-text">
+                      <span class="title">Phonetic Guides</span>
+                      <span class="desc">Show Furigana, Romaji, or Pinyin</span>
+                    </div>
+                  </div>
+                  <div class="toggle-check">
+                    <div class="check-box"></div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Step 4: Review (Session Preview) -->
+              <div v-else-if="activeTab === 4" class="step-pane">
+                <div class="review-header-visual">
+                  <div class="visual-circle-premium">
+                    <div class="pulse-ring-slow"></div>
+                    <div class="pulse-ring-fast"></div>
+                    <span class="icon-main">⚡</span>
+                  </div>
+                  <div class="header-text">
+                    <h3>Your Session is Ready</h3>
+                    <p class="text-muted">We've designed a custom curriculum based on your preferences.</p>
+                  </div>
+                </div>
+                
+                <div class="session-summary-grid">
+                  <div class="summary-card">
+                    <div class="summary-icon">🎯</div>
+                    <div class="summary-details">
+                      <span class="summary-label">Target</span>
+                      <span class="summary-value">{{ model.targetLanguage }} ({{ model.proficiencyLevel }})</span>
+                    </div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-icon">📝</div>
+                    <div class="summary-details">
+                      <span class="summary-label">Topic</span>
+                      <span class="summary-value">{{ model.topic }}</span>
+                    </div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-icon">🔍</div>
+                    <div class="summary-details">
+                      <span class="summary-label">Focus</span>
+                      <span class="summary-value">{{ model.focusArea }}</span>
+                    </div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-icon">🎭</div>
+                    <div class="summary-details">
+                      <span class="summary-label">Tone</span>
+                      <span class="summary-value">{{ model.tone }}</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="form-group">
-                  <div class="label-with-value">
-                    <label>Questions</label>
-                    <span class="badge badge-primary">{{ model.quizLength }}</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="1" max="20" 
-                    :value="model.quizLength" 
-                    @input="update('quizLength', parseInt(($event.target as HTMLInputElement).value))"
-                    class="slider-premium"
-                  />
+                <div class="plan-details card-premium glass mt-4">
+                  <h4 class="plan-title">Curriculum Overview</h4>
+                  <ul class="plan-list">
+                    <li><span class="dot"></span> <div>Immersive {{ model.focusArea }} practice in a {{ model.learningScenario }} context.</div></li>
+                    <li><span class="dot"></span> <div>{{ model.quizLength }} adaptive questions with {{ model.explanationDepth }} feedback.</div></li>
+                    <li><span class="dot"></span> <div>Real-time phonetic guides and color-coded linguistic breakdown.</div></li>
+                  </ul>
+                </div>
+
+                <div class="review-footer-action mt-5">
+                  <p class="text-subtle mb-3">Ready to transform your {{ model.targetLanguage }} skills?</p>
                 </div>
               </div>
             </div>
+          </Transition>
+        </div>
 
-            <!-- Step 3: Style -->
-            <div v-else-if="activeTab === 3" class="step-pane">
-              <h3>Fine-tune the delivery</h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Format</label>
-                  <select :value="model.quizFormat" @change="update('quizFormat', ($event.target as HTMLSelectElement).value)" class="input-premium">
-                    <option v-for="f in formats" :key="f" :value="f">{{ f }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Tone</label>
-                  <select :value="model.tone" @change="update('tone', ($event.target as HTMLSelectElement).value)" class="input-premium">
-                    <option v-for="t in tones" :key="t" :value="t">{{ t }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Scenario</label>
-                  <select :value="model.learningScenario" @change="update('learningScenario', ($event.target as HTMLSelectElement).value)" class="input-premium">
-                    <option v-for="s in scenarios" :key="s" :value="s">{{ s }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Difficulty</label>
-                  <select :value="model.difficultyMode" @change="update('difficultyMode', ($event.target as HTMLSelectElement).value)" class="input-premium">
-                    <option v-for="m in modes" :key="m" :value="m">{{ m }}</option>
-                  </select>
-                </div>
-              </div>
-              
-              <label class="toggle-card card-interactive" :class="{ active: model.includePhonetics }">
-                <input 
-                  type="checkbox" 
-                  :checked="model.includePhonetics" 
-                  @change="update('includePhonetics', ($event.target as HTMLInputElement).checked)"
-                  class="hidden-input"
-                />
-                <div class="toggle-content">
-                  <div class="toggle-icon">🏮</div>
-                  <div class="toggle-text">
-                    <span class="title">Phonetic Guides</span>
-                    <span class="desc">Show Furigana, Romaji, or Pinyin</span>
-                  </div>
-                </div>
-                <div class="toggle-check">
-                  <div class="check-box"></div>
-                </div>
-              </label>
-            </div>
-
-            <!-- Step 4: Review (Session Preview) -->
-            <div v-else-if="activeTab === 4" class="step-pane">
-              <div class="review-header-visual">
-                <div class="visual-circle-premium">
-                  <div class="pulse-ring-slow"></div>
-                  <div class="pulse-ring-fast"></div>
-                  <span class="icon-main">⚡</span>
-                </div>
-                <div class="header-text">
-                  <h3>Your Session is Ready</h3>
-                  <p class="text-muted">We've designed a custom curriculum based on your preferences.</p>
-                </div>
-              </div>
-              
-              <div class="session-summary-grid">
-                <div class="summary-card">
-                  <div class="summary-icon">🎯</div>
-                  <div class="summary-details">
-                    <span class="summary-label">Target</span>
-                    <span class="summary-value">{{ model.targetLanguage }} ({{ model.proficiencyLevel }})</span>
-                  </div>
-                </div>
-                <div class="summary-card">
-                  <div class="summary-icon">📝</div>
-                  <div class="summary-details">
-                    <span class="summary-label">Topic</span>
-                    <span class="summary-value">{{ model.topic }}</span>
-                  </div>
-                </div>
-                <div class="summary-card">
-                  <div class="summary-icon">🔍</div>
-                  <div class="summary-details">
-                    <span class="summary-label">Focus</span>
-                    <span class="summary-value">{{ model.focusArea }}</span>
-                  </div>
-                </div>
-                <div class="summary-card">
-                  <div class="summary-icon">🎭</div>
-                  <div class="summary-details">
-                    <span class="summary-label">Tone</span>
-                    <span class="summary-value">{{ model.tone }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="plan-details card-premium glass mt-4">
-                <h4 class="plan-title">Curriculum Overview</h4>
-                <ul class="plan-list">
-                  <li><span class="dot"></span> <div>Immersive {{ model.focusArea }} practice in a {{ model.learningScenario }} context.</div></li>
-                  <li><span class="dot"></span> <div>{{ model.quizLength }} adaptive questions with {{ model.explanationDepth }} feedback.</div></li>
-                  <li><span class="dot"></span> <div>Real-time phonetic guides and color-coded linguistic breakdown.</div></li>
-                </ul>
-              </div>
-
-              <div class="review-footer-action mt-5">
-                <p class="text-subtle mb-3">Ready to transform your {{ model.targetLanguage }} skills?</p>
-              </div>
-            </div>
-          </div>
-        </Transition>
-
-      </main>
+      </div>
 
       <!-- Sidebar Preview (Desktop Only) -->
       <aside class="session-preview sidebar card-premium glass" v-if="activeTab < 4">
@@ -382,12 +384,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 <style scoped>
 .lumina-dashboard {
   width: 100%;
-  max-width: none;
-  margin: 0 auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
-  padding: clamp(1rem, 4vw, 4rem);
+  overflow: hidden;
+  min-height: 0;
 }
 
 .dashboard-header {
@@ -505,13 +506,15 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   flex-direction: column;
   gap: 2.5rem;
   width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .wizard-content {
   width: 100%;
   margin: 0 auto;
-  padding: clamp(2rem, 6vw, 4rem);
-  min-height: 500px;
+  min-height: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -519,7 +522,15 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   background: var(--bg-main);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-xl);
+  overflow: hidden;
 }
+
+.wizard-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
 
 .step-pane {
   max-width: 1000px;

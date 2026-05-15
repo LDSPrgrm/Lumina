@@ -25,32 +25,7 @@ const emit = defineEmits<{
   backToDashboard: [];
 }>();
 
-const suggestedLevel = computed(() => {
-  const score = props.score;
-  // Consistent logic with QuizPlayer/useQuiz
-  if (score >= 10) return "C2";
-  if (score >= 9) return "C1 (Advanced)";
-  if (score >= 7) return "B2";
-  if (score >= 5) return "B1 (Intermediate)";
-  if (score >= 3) return "A2";
-  return "A1 (Beginner)";
-});
 
-const levelDescription = computed(() => {
-  const level = suggestedLevel.value;
-  if (level.includes("A1")) return "Beginner: You're just starting out!";
-  if (level.includes("A2")) return "Elementary: You know the basics.";
-  if (level.includes("B1")) return "Intermediate: You can handle daily situations.";
-  if (level.includes("B2")) return "Upper Intermediate: You're becoming fluent.";
-  if (level.includes("C1")) return "Advanced: You have strong command.";
-  return "Mastery: You're almost a native speaker!";
-});
-
-function handleApplyLevel() {
-  store.markAsDiagnosed(suggestedLevel.value);
-  store.isDiagnosticActive = false;
-  emit('backToDashboard');
-}
 
 function highlightAnswer(q: QuizQuestion) {
   if (!q.question.includes('____')) return q.question;
@@ -60,195 +35,219 @@ function highlightAnswer(q: QuizQuestion) {
 </script>
 
 <template>
-  <div class="lumina-result-view animate-in">
-    <!-- Header: Celebration -->
-    <div class="result-celebration card-premium glass">
-      <div class="score-orbit">
-        <div class="orbit-ring" :style="{ '--color': scoreColor, '--percent': scorePercentage }">
-          <svg viewBox="0 0 100 100">
-            <!-- Background track -->
-            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-light)" stroke-width="5" />
-            
-            <!-- Multi-colored quadrant segments (decorative) -->
-            <circle v-for="(color, i) in quadrantColors" :key="i"
-              cx="50" cy="50" r="45"
-              fill="none"
-              :stroke="color"
-              stroke-width="2"
-              stroke-dasharray="70 213"
-              :stroke-dashoffset="-(i * 70.75)"
-              transform="rotate(-90 50 50)"
-              style="opacity: 0.2;"
-            />
+  <div class="lumina-result-view">
+    <div class="result-body">
+      <!-- Header: Celebration -->
+      <div class="result-celebration card-premium glass">
+        <div class="score-orbit">
+          <div class="orbit-ring" :style="{ '--color': scoreColor, '--percent': scorePercentage }">
+            <svg viewBox="0 0 100 100">
+              <!-- Background track -->
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-light)" stroke-width="5" />
+              
+              <!-- Multi-colored quadrant segments (decorative) -->
+              <circle v-for="(color, i) in quadrantColors" :key="i"
+                cx="50" cy="50" r="45"
+                fill="none"
+                :stroke="color"
+                stroke-width="2"
+                stroke-dasharray="70 213"
+                :stroke-dashoffset="-(i * 70.75)"
+                transform="rotate(-90 50 50)"
+                style="opacity: 0.2;"
+              />
 
-            <!-- Primary Progress Ring -->
-            <circle
-              cx="50" cy="50" r="45"
-              fill="none"
-              :stroke="scoreColor"
-              stroke-width="6"
-              stroke-linecap="round"
-              stroke-dasharray="283"
-              :stroke-dashoffset="283 - (283 * scorePercentage) / 100"
-              transform="rotate(-90 50 50)"
-              class="orbit-progress"
-            />
-          </svg>
-          <div class="orbit-content">
-            <span class="percentage">{{ scorePercentage }}%</span>
-            <span class="ratio">{{ score }}/{{ totalQuestions }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="celebration-text">
-        <h1 class="text-gradient">{{ scoreMessage }}</h1>
-        <div class="result-emoji animate-bounce-premium">{{ scoreEmoji }}</div>
-        <p class="summary">
-          You've completed your session on <strong>{{ questions[0]?.topic || 'New Topics' }}</strong>.
-          <span v-if="wrongCount > 0"> You mastered most of the material!</span>
-        </p>
-      </div>
-
-      <div v-if="store.isDiagnosticActive" class="diagnostic-result card-premium animate-scale-in">
-        <div class="level-badge">{{ suggestedLevel }}</div>
-        <h2>Suggested Level: {{ suggestedLevel }}</h2>
-        <p>{{ levelDescription }}</p>
-        <button class="btn btn-primary btn-lg" @click="handleApplyLevel">
-          Save Level & Start Learning
-        </button>
-      </div>
-
-      <div v-else class="result-actions">
-        <button class="btn btn-primary start-pulse" @click="$emit('newSession')">
-          New Session
-        </button>
-        <button class="btn btn-outline" @click="$emit('restart')">
-          Retake Quiz
-        </button>
-        <button class="btn btn-outline" @click="$emit('backToDashboard')">
-          Back to Dashboard
-        </button>
-      </div>
-    </div>
-
-    <!-- Review Section -->
-    <div class="review-area">
-      <div class="section-header">
-        <h3>Session Review</h3>
-        <button class="btn btn-outline btn-sm" @click="emit('update:showReview', !showReview)">
-          {{ showReview ? 'Hide' : 'Show' }} Details
-        </button>
-      </div>
-
-      <Transition name="fade">
-        <div v-if="showReview" class="review-grid">
-          <div
-            v-for="(q, idx) in questions"
-            :key="idx"
-            class="review-card card-premium"
-          >
-            <div class="review-meta">
-              <span class="q-num">Q{{ idx + 1 }}</span>
-              <span class="q-status" :class="userAnswers[idx] === q.correctIndex ? 'success' : 'error'">
-                {{ userAnswers[idx] === q.correctIndex ? 'Mastered' : 'Incorrect' }}
-              </span>
-            </div>
-            
-            <p class="q-text" v-html="highlightAnswer(q)"></p>
-
-            <div v-if="userAnswers[idx] !== q.correctIndex && userAnswers[idx] !== null" class="q-answer-box error">
-              <span class="label">Your Answer</span>
-              <div class="answer-tokens">
-                <div class="phrase-row">
-                  <span
-                    v-for="(token, tIdx) in q.options[userAnswers[idx]!]?.tokens"
-                    :key="tIdx"
-                    class="token-wrapper"
-                  >
-                    <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-                      <ruby v-if="token.reading && token.text !== token.reading">
-                        {{ token.text }}
-                        <rt>{{ token.reading }}</rt>
-                      </ruby>
-                      <span v-else>{{ token.text }}</span>
-                      <span class="token-tooltip">{{ token.meaning }}</span>
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="q-answer-box success">
-              <span class="label">Correct Answer</span>
-              <div class="answer-tokens">
-                <div class="phrase-row">
-                  <span
-                    v-for="(token, tIdx) in q.options[q.correctIndex]?.tokens"
-                    :key="tIdx"
-                    class="token-wrapper"
-                  >
-                    <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-                      <ruby v-if="token.reading && token.text !== token.reading">
-                        {{ token.text }}
-                        <rt>{{ token.reading }}</rt>
-                      </ruby>
-                      <span v-else>{{ token.text }}</span>
-                      <span class="token-tooltip">{{ token.meaning }}</span>
-                    </span>
-                  </span>
-                </div>
-                
-                <!-- Romaji Row -->
-                <div v-if="q.options[q.correctIndex]?.romajiTokens?.length" class="romaji-row">
-                  <span 
-                    v-for="(token, tIdx) in q.options[q.correctIndex]?.romajiTokens" 
-                    :key="'r' + tIdx"
-                    class="token-simple"
-                    :class="`token-${token.colorIndex}`"
-                  >
-                    {{ token.text }}&nbsp;
-                  </span>
-                </div>
-                <div v-else class="romaji-row">
-                  {{ q.options[q.correctIndex]?.romaji }}
-                </div>
-
-                <!-- English Row -->
-                <div v-if="q.options[q.correctIndex]?.englishTokens?.length" class="english-row">
-                  <span 
-                    v-for="(token, tIdx) in q.options[q.correctIndex]?.englishTokens" 
-                    :key="'e' + tIdx"
-                    class="token-simple"
-                    :class="`token-${token.colorIndex}`"
-                  >
-                    {{ token.text }}&nbsp;
-                  </span>
-                </div>
-                <div v-else class="english-row">
-                  {{ q.options[q.correctIndex]?.english }}
-                </div>
-              </div>
-            </div>
-            
-            <div v-if="q.explanation" class="q-explanation">
-              <p>{{ q.explanation }}</p>
+              <!-- Primary Progress Ring -->
+              <circle
+                cx="50" cy="50" r="45"
+                fill="none"
+                :stroke="scoreColor"
+                stroke-width="6"
+                stroke-linecap="round"
+                stroke-dasharray="283"
+                :stroke-dashoffset="283 - (283 * scorePercentage) / 100"
+                transform="rotate(-90 50 50)"
+                class="orbit-progress"
+              />
+            </svg>
+            <div class="orbit-content">
+              <span class="percentage">{{ scorePercentage }}%</span>
+              <span class="ratio">{{ score }}/{{ totalQuestions }}</span>
             </div>
           </div>
         </div>
-      </Transition>
+
+        <div class="celebration-text">
+          <h1 class="text-gradient">{{ scoreMessage }}</h1>
+          <div class="result-emoji animate-bounce-premium">{{ scoreEmoji }}</div>
+          <p class="summary">
+            You've completed your session on <strong>{{ questions[0]?.topic || 'New Topics' }}</strong>.
+            <span v-if="wrongCount > 0"> You mastered most of the material!</span>
+          </p>
+        </div>
+
+
+      </div>
+
+      <!-- Review Section -->
+      <div class="review-area">
+        <div class="section-header">
+          <h3>Session Review</h3>
+          <button class="btn btn-outline btn-sm" @click="emit('update:showReview', !showReview)">
+            {{ showReview ? 'Hide' : 'Show' }} Details
+          </button>
+        </div>
+
+        <Transition name="fade">
+          <div v-if="showReview" class="review-grid">
+            <div
+              v-for="(q, idx) in questions"
+              :key="idx"
+              class="review-card card-premium"
+            >
+              <div class="review-meta">
+                <span class="q-num">Q{{ idx + 1 }}</span>
+                <span class="q-status" :class="userAnswers[idx] === q.correctIndex ? 'success' : 'error'">
+                  {{ userAnswers[idx] === q.correctIndex ? 'Mastered' : 'Incorrect' }}
+                </span>
+              </div>
+              
+              <p class="q-text" v-html="highlightAnswer(q)"></p>
+
+              <div v-if="userAnswers[idx] !== q.correctIndex && userAnswers[idx] !== null" class="q-answer-box error">
+                <span class="label">Your Answer</span>
+                <div class="answer-tokens">
+                  <div class="phrase-row">
+                    <span
+                      v-for="(token, tIdx) in q.options[userAnswers[idx]!]?.tokens"
+                      :key="tIdx"
+                      class="token-wrapper"
+                    >
+                      <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
+                        <ruby v-if="token.reading && token.text !== token.reading">
+                          {{ token.text }}
+                          <rt>{{ token.reading }}</rt>
+                        </ruby>
+                        <span v-else>{{ token.text }}</span>
+                        <span class="token-tooltip">{{ token.meaning }}</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="q-answer-box success">
+                <span class="label">Correct Answer</span>
+                <div class="answer-tokens">
+                  <div class="phrase-row">
+                    <span
+                      v-for="(token, tIdx) in q.options[q.correctIndex]?.tokens"
+                      :key="tIdx"
+                      class="token-wrapper"
+                    >
+                      <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
+                        <ruby v-if="token.reading && token.text !== token.reading">
+                          {{ token.text }}
+                          <rt>{{ token.reading }}</rt>
+                        </ruby>
+                        <span v-else>{{ token.text }}</span>
+                        <span class="token-tooltip">{{ token.meaning }}</span>
+                      </span>
+                    </span>
+                  </div>
+                  
+                  <!-- Romaji Row -->
+                  <div v-if="q.options[q.correctIndex]?.romajiTokens?.length" class="romaji-row">
+                    <span 
+                      v-for="(token, tIdx) in q.options[q.correctIndex]?.romajiTokens" 
+                      :key="'r' + tIdx"
+                      class="token-simple"
+                      :class="`token-${token.colorIndex}`"
+                    >
+                      {{ token.text }}&nbsp;
+                    </span>
+                  </div>
+                  <div v-else class="romaji-row">
+                    {{ q.options[q.correctIndex]?.romaji }}
+                  </div>
+
+                  <!-- English Row -->
+                  <div v-if="q.options[q.correctIndex]?.englishTokens?.length" class="english-row">
+                    <span 
+                      v-for="(token, tIdx) in q.options[q.correctIndex]?.englishTokens" 
+                      :key="'e' + tIdx"
+                      class="token-simple"
+                      :class="`token-${token.colorIndex}`"
+                    >
+                      {{ token.text }}&nbsp;
+                    </span>
+                  </div>
+                  <div v-else class="english-row">
+                    {{ q.options[q.correctIndex]?.english }}
+                  </div>
+                </div>
+              </div>
+              
+              <div v-if="q.explanation" class="q-explanation">
+                <p>{{ q.explanation }}</p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
     </div>
+
+    <!-- Fixed Bottom Action Bar -->
+    <footer class="result-action-bar">
+      <div class="action-bar-content">
+
+        <div v-else class="action-buttons result-group">
+          <button class="btn btn-primary btn-xl btn-hero start-pulse" @click="$emit('newSession')">
+            <div class="btn-shimmer shimmer-effect"></div>
+            <span>New Session</span>
+            <span class="btn-arrow">🚀</span>
+          </button>
+          <div class="secondary-actions">
+            <button class="btn btn-outline" @click="$emit('restart')">
+              Retake Quiz
+            </button>
+            <button class="btn btn-outline" @click="$emit('backToDashboard')">
+              Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .lumina-result-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background-color: var(--bg-page);
+  min-height: 0;
+  contain: paint; /* Contain layout to prevent bleeding */
+}
+
+.result-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem 1.5rem 4rem;
   max-width: 900px;
   margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 3rem;
-  padding: 1rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .result-celebration {
@@ -258,6 +257,7 @@ function highlightAnswer(q: QuizQuestion) {
   text-align: center;
   padding: 4rem 2rem;
   gap: 2.5rem;
+  width: 100%;
 }
 
 .score-orbit {
@@ -302,7 +302,9 @@ function highlightAnswer(q: QuizQuestion) {
 
 .celebration-text h1 {
   font-size: clamp(2rem, 8vw, 3.5rem);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .celebration-text .summary {
@@ -331,53 +333,117 @@ function highlightAnswer(q: QuizQuestion) {
   50% { transform: translateY(-10px) scale(1.05); }
 }
 
-.result-actions {
+/* Fixed Bottom Action Bar */
+.result-action-bar {
+  flex-shrink: 0;
+  padding: 1.25rem 2rem;
+  z-index: 1000;
+  border-top: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  justify-content: center;
+}
+
+.action-bar-content {
+  width: 100%;
+  max-width: 800px;
+}
+
+.action-buttons {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+}
+
+.action-buttons.result-group {
+  justify-content: space-between;
+}
+
+.secondary-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.secondary-actions .btn {
+  min-width: 120px;
+}
+
+.action-buttons.full-width {
   justify-content: center;
 }
 
-.result-actions .btn {
-  min-width: 160px;
-}
-
-.diagnostic-result {
-  background: var(--primary-alpha);
-  border: 2px solid var(--primary);
-  padding: 2.5rem;
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+.action-buttons.full-width .btn {
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
 }
 
-.level-badge {
-  width: 80px;
-  height: 80px;
-  background: var(--primary);
+/* Hero Button Styling */
+.btn-hero {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--primary), #00c071);
+  box-shadow: 
+    0 4px 15px rgba(0, 220, 130, 0.3),
+    0 10px 20px -10px rgba(0, 0, 0, 0.2);
+  border: none;
+  position: relative;
+  overflow: hidden;
   color: white;
-  border-radius: 50%;
+  transition: all 0.4s var(--ease-premium);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  font-weight: 900;
-  box-shadow: 0 0 20px var(--primary-alpha);
+  gap: 0.75rem;
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
 }
 
-.diagnostic-result h2 {
-  font-size: 1.75rem;
-  margin: 0;
+.btn-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
 }
+
+.btn-hero:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 8px 25px rgba(0, 220, 130, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-arrow {
+  transition: transform 0.3s var(--ease-premium);
+  font-size: 1.25rem;
+}
+
+.btn-hero:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+
 
 .start-pulse {
-  padding-left: 3rem;
-  padding-right: 3rem;
   animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(0, 220, 130, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 220, 130, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 220, 130, 0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.6s var(--ease-premium) forwards;
 }
 
 /* Review Area */
@@ -460,12 +526,6 @@ function highlightAnswer(q: QuizQuestion) {
   text-transform: uppercase;
   margin-bottom: 0.5rem;
   display: block;
-}
-
-.q-answer-box .answer {
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--success);
 }
 
 .q-explanation {
@@ -557,55 +617,62 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 }
 
 @media (max-width: 900px) {
-  .result-celebration { padding: 3rem 1.5rem; gap: 2rem; }
-  .celebration-text h1 { font-size: 2.75rem; }
-  .score-orbit { width: 160px; height: 160px; }
-  .percentage { font-size: 2.5rem; }
+  .result-celebration { padding: 2.5rem 1.5rem; gap: 1.5rem; }
+  .celebration-text h1 { font-size: 2.5rem; }
+  .score-orbit { width: 150px; height: 150px; }
+  .percentage { font-size: 2.25rem; }
+}
+
+@media (max-width: 768px) {
+  .result-action-bar { padding: 0.75rem 1rem; }
+  .action-buttons.result-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  .secondary-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .secondary-actions .btn {
+    min-width: 0;
+  }
+  .action-buttons .btn-hero {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
-  .lumina-result-view {
-    gap: 2rem;
-    padding: 0.5rem;
+  .result-body {
+    gap: 1.25rem;
+    padding: 1rem 0.75rem 1.5rem;
   }
 
   .result-celebration {
-    padding: 2.5rem 1.25rem;
-    gap: 1.5rem;
+    padding: 2rem 1rem;
+    gap: 1rem;
   }
 
   .score-orbit {
-    width: 140px;
-    height: 140px;
+    width: 120px;
+    height: 120px;
   }
 
   .percentage {
-    font-size: 2.25rem;
-  }
-
-  .celebration-text h1 {
     font-size: 2rem;
   }
 
+  .celebration-text h1 {
+    font-size: 1.75rem;
+  }
+
   .celebration-text .summary {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
-  .result-actions {
-    flex-direction: column;
-    width: 100%;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
 
-  .diagnostic-result {
-    padding: 1.5rem;
-    gap: 1.25rem;
-  }
-
-  .diagnostic-result h2 {
-    font-size: 1.4rem;
-  }
 
   .review-card {
     padding: 1.25rem;

@@ -23,7 +23,7 @@ function getScoreColor(percentage: number) {
 </script>
 
 <template>
-  <div class="history-view animate-in">
+  <div class="history-view">
     <div class="header-section">
       <h2 class="title-gradient">Learning History</h2>
       <p class="subtitle">Review and retake your past practice sessions</p>
@@ -40,7 +40,7 @@ function getScoreColor(percentage: number) {
       <div 
         v-for="session in store.quizHistory" 
         :key="session.id"
-        class="history-card card-premium glass animate-scale-in"
+        class="history-card card-premium glass"
       >
         <div class="card-left">
           <div class="session-info">
@@ -78,7 +78,10 @@ function getScoreColor(percentage: number) {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding-bottom: 4rem;
+  padding: 1.5rem 1rem 4rem 1rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .header-section {

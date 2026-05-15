@@ -52,47 +52,26 @@ function handleRetake(session: any) {
       </template>
     </AppHeader>
 
-    <main class="container">
-      <!-- Onboarding Screen -->
-      <OnboardingView v-if="!store.isConfigured" />
+    <!-- Onboarding Screen -->
+    <OnboardingView v-if="!store.isConfigured" />
 
-      <div v-else class="content-wrapper">
-        <QuizPlayer v-if="store.currentTab === 'quiz'" />
-        <SettingsPanel v-if="store.currentTab === 'settings'" />
-        <HistoryView v-if="store.currentTab === 'history'" @retake="handleRetake" />
-      </div>
-    </main>
+    <QuizPlayer v-if="store.isConfigured && store.currentTab === 'quiz'" />
+    <SettingsPanel v-if="store.isConfigured && store.currentTab === 'settings'" />
+    <HistoryView v-if="store.isConfigured && store.currentTab === 'history'" @retake="handleRetake" />
   </div>
 </template>
 
 <style scoped>
 .app-container {
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 0;
+  overflow: hidden; /* Lock entire app */
 }
 
-main.container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: v-bind("store.currentTab === 'quiz' ? '100%' : '1000px'");
-  margin: 0 auto;
-  padding: v-bind("store.currentTab === 'quiz' ? '0' : '1rem'");
-  /* Prevent full-page scroll if content fits */
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 
-.content-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
 
 /* Segmented nav */
 .pill-nav {

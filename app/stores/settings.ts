@@ -18,8 +18,6 @@ export const useSettingsStore = defineStore('settings', {
     regionalDialect: 'Standard',
     explanationDepth: 'Detailed',
     isConfigured: false,
-    isDiagnosed: false,
-    isDiagnosticActive: false,
     currentTab: 'quiz',
     quizHistory: [] as any[],
     pendingQuiz: null as any
@@ -82,19 +80,11 @@ export const useSettingsStore = defineStore('settings', {
         const savedPhonetics = localStorage.getItem('lumina_include_phonetics')
         if (savedPhonetics) this.includePhonetics = savedPhonetics === 'true'
 
-        const savedDiagnosed = localStorage.getItem('lumina_is_diagnosed')
-        if (savedDiagnosed) this.isDiagnosed = savedDiagnosed === 'true'
+
       }
     },
 
-    markAsDiagnosed(level: string) {
-      this.proficiencyLevel = level
-      this.isDiagnosed = true
-      if (process.client) {
-        localStorage.setItem('lumina_level', level)
-        localStorage.setItem('lumina_is_diagnosed', 'true')
-      }
-    },
+
     
     savePreference(key: string, value: any) {
       if (process.client) {
