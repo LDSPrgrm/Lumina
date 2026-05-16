@@ -135,31 +135,6 @@ function handleBackToDashboard() {
   quiz.resetState(); 
 }
 
-// ── Vocabulary logic ─────────────────────────────────────────────────
-const vocabItems = computed(() => {
-  if (!currentQuestion.value) return [];
-  
-  const correctOption = currentQuestion.value.options[currentQuestion.value.correctIndex];
-  
-  // Combine tokens from question and the CORRECT option
-  const allTokens = [
-    ...(currentQuestion.value.questionTokens || []),
-    ...(correctOption?.tokens || [])
-  ];
-
-  const seen = new Set();
-  return allTokens.filter(token => {
-    const isUseful = token.meaning && 
-                    token.meaning !== "____" && 
-                    token.text !== "____" &&
-                    token.text.trim().length > 0;
-    if (isUseful && !seen.has(token.text)) {
-      seen.add(token.text);
-      return true;
-    }
-    return false;
-  });
-});
 </script>
 
 <template>
@@ -245,35 +220,6 @@ const vocabItems = computed(() => {
           </div>
         </div>
 
-        <!-- 3. Vocabulary Container -->
-        <div v-if="hasSubmitted && vocabItems.length" class="vocab-container">
-          <div class="vocab-breakdown">
-            <h4 class="breakdown-title">Vocabulary Breakdown</h4>
-            <div class="vocab-table-wrapper">
-              <table class="vocab-table">
-                <thead>
-                  <tr>
-                    <th>Term</th>
-                    <th>Meaning</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item, vIdx) in vocabItems" :key="'v' + vIdx">
-                    <td class="col-term">
-                      <LuminaToken
-                        :text="item.text"
-                        :reading="item.reading"
-                        :romaji="item.romaji"
-                        :meaning="item.meaning"
-                      />
-                    </td>
-                    <td class="col-meaning">{{ item.meaning }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Simple Fixed Bottom Action Bar -->
@@ -627,98 +573,6 @@ const vocabItems = computed(() => {
   margin: 0;
 }
 
-/* 3. Vocabulary Container */
-.vocab-container {
-  width: 100%;
-  flex-shrink: 0;
-  margin-bottom: 2rem;
-  animation: slide-up 0.5s var(--ease-premium);
-}
-
-.vocab-breakdown {
-  text-align: left;
-}
-
-.breakdown-title {
-  font-size: 0.95rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-left: 0.5rem;
-}
-
-.breakdown-title::before {
-  content: "";
-  display: block;
-  width: 4px;
-  height: 1.2em;
-  background: var(--primary);
-  border-radius: 99px;
-}
-
-.vocab-table-wrapper {
-  border-radius: var(--radius-lg);
-  background: white;
-  border: 1px solid var(--border-light);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-.vocab-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.vocab-table th {
-  padding: 1.25rem 1.5rem;
-  background: var(--bg-subtle);
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-bottom: 1px solid var(--border-main);
-}
-
-.vocab-table td {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  vertical-align: middle;
-  transition: all 0.2s ease;
-}
-
-.vocab-table tr:hover td {
-  background: var(--bg-subtle);
-}
-
-.vocab-table tr:last-child td {
-  border-bottom: none;
-}
-
-.col-term {
-  font-weight: 800;
-  color: var(--text-main);
-  font-size: 1.25rem;
-  white-space: nowrap;
-}
-
-.col-meaning {
-  color: var(--text-main);
-  font-weight: 600;
-  line-height: 1.5;
-  font-size: 1rem;
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 /* Fixed Bottom Action Bar */
 .quiz-action-bar {
@@ -842,6 +696,17 @@ const vocabItems = computed(() => {
   opacity: 0;
   transform: translateX(-30px);
 }
+
+.fade-fast-enter-active,
+.fade-fast-leave-active {
+  transition: opacity 0.2s var(--ease-premium);
+}
+
+.fade-fast-enter-from,
+.fade-fast-leave-to {
+  opacity: 0;
+}
+
 
 @media (max-width: 900px) {
   .session-nav { padding: 0 1.25rem; }

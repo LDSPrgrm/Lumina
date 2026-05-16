@@ -86,7 +86,7 @@ function handleNext() {
               :key="tIdx"
               :text="token.text"
               :reading="token.reading"
-              :romaji="option.romajiTokens?.[tIdx]?.text"
+              :romaji="option.romajiTokens?.[tIdx]?.text || (tIdx === 0 && !option.romajiTokens?.length ? option.romaji : '')"
               :meaning="token.meaning"
               :colorIndex="token.colorIndex"
             />
@@ -136,6 +136,11 @@ function handleNext() {
   letter-spacing: -0.02em;
 }
 
+.question-body {
+  position: relative;
+  z-index: 1; /* Keep question body at a base layer */
+}
+
 .token-container {
   display: flex;
   flex-direction: column;
@@ -166,6 +171,8 @@ function handleNext() {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
+  position: relative;
+  z-index: 10; /* Ensure tooltips in options appear above the question body */
 }
 
 .option-card {
@@ -174,6 +181,13 @@ function handleNext() {
   gap: 1rem;
   padding: 1.25rem;
   text-align: left;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.option-card:hover,
+.option-card:focus-within {
+  z-index: 100; /* Bring the active/hovered option card to the front */
 }
 
 .option-card.active {
@@ -206,14 +220,15 @@ function handleNext() {
 }
 
 /* Ensure tokens remain interactive even in disabled state */
+.option-card.disabled .option-content,
 .option-card.disabled .phrase-row {
   pointer-events: auto;
 }
 
-/* Ensure tokens remain legible against colored background states */
+/* Clearer text for colored background states */
 .option-card.correct .phrase-row,
 .option-card.wrong .phrase-row {
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+  text-shadow: none;
 }
 
 .option-indicator .letter {

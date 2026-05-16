@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { QuizQuestion } from "~/utils/gemini";
+import LuminaToken from "~/components/LuminaToken.vue";
 const store = useSettingsStore();
 
 const props = defineProps<{
@@ -118,20 +119,16 @@ function highlightAnswer(q: QuizQuestion) {
                 <span class="label">Your Answer</span>
                 <div class="answer-tokens">
                   <div class="phrase-row">
-                    <span
-                      v-for="(token, tIdx) in q.options[userAnswers[idx]!]?.tokens"
-                      :key="tIdx"
-                      class="token-wrapper"
-                    >
-                      <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-                        <ruby v-if="token.reading && token.text !== token.reading">
-                          {{ token.text }}
-                          <rt>{{ token.reading }}</rt>
-                        </ruby>
-                        <span v-else>{{ token.text }}</span>
-                        <span class="token-tooltip">{{ token.meaning }}</span>
-                      </span>
-                    </span>
+                      <LuminaToken
+                        v-for="(token, tIdx) in q.options[userAnswers[idx]!]?.tokens"
+                        :key="tIdx"
+                        :text="token.text"
+                        :reading="token.reading"
+                        :romaji="q.options[userAnswers[idx]!].romajiTokens?.[tIdx]?.text"
+                        :meaning="token.meaning"
+                        :colorIndex="token.colorIndex"
+                        variant="mini"
+                      />
                   </div>
                 </div>
               </div>
@@ -140,50 +137,28 @@ function highlightAnswer(q: QuizQuestion) {
                 <span class="label">Correct Answer</span>
                 <div class="answer-tokens">
                   <div class="phrase-row">
-                    <span
-                      v-for="(token, tIdx) in q.options[q.correctIndex]?.tokens"
-                      :key="tIdx"
-                      class="token-wrapper"
-                    >
-                      <span class="token-premium" :class="`token-${token.colorIndex}`" tabindex="0">
-                        <ruby v-if="token.reading && token.text !== token.reading">
-                          {{ token.text }}
-                          <rt>{{ token.reading }}</rt>
-                        </ruby>
-                        <span v-else>{{ token.text }}</span>
-                        <span class="token-tooltip">{{ token.meaning }}</span>
-                      </span>
-                    </span>
+                      <LuminaToken
+                        v-for="(token, tIdx) in q.options[q.correctIndex]?.tokens"
+                        :key="tIdx"
+                        :text="token.text"
+                        :reading="token.reading"
+                        :romaji="q.options[q.correctIndex].romajiTokens?.[tIdx]?.text || (tIdx === 0 ? q.options[q.correctIndex].romaji : '')"
+                        :meaning="token.meaning"
+                        :colorIndex="token.colorIndex"
+                        variant="mini"
+                      />
                   </div>
                   
-                  <!-- Romaji Row -->
-                  <div v-if="q.options[q.correctIndex]?.romajiTokens?.length" class="romaji-row">
-                    <span 
-                      v-for="(token, tIdx) in q.options[q.correctIndex]?.romajiTokens" 
-                      :key="'r' + tIdx"
-                      class="token-simple"
-                      :class="`token-${token.colorIndex}`"
-                    >
-                      {{ token.text }}&nbsp;
-                    </span>
-                  </div>
-                  <div v-else class="romaji-row">
-                    {{ q.options[q.correctIndex]?.romaji }}
-                  </div>
-
-                  <!-- English Row -->
-                  <div v-if="q.options[q.correctIndex]?.englishTokens?.length" class="english-row">
-                    <span 
-                      v-for="(token, tIdx) in q.options[q.correctIndex]?.englishTokens" 
-                      :key="'e' + tIdx"
-                      class="token-simple"
-                      :class="`token-${token.colorIndex}`"
-                    >
-                      {{ token.text }}&nbsp;
-                    </span>
-                  </div>
-                  <div v-else class="english-row">
-                    {{ q.options[q.correctIndex]?.english }}
+                  <!-- Full Phrase Breakdown -->
+                  <div class="full-breakdown-row">
+                    <div class="romaji-row">
+                      <span class="label-inline">Pronunciation:</span>
+                      {{ q.options[q.correctIndex]?.romaji }}
+                    </div>
+                    <div class="english-row">
+                      <span class="label-inline">Meaning:</span>
+                      {{ q.options[q.correctIndex]?.english }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -201,7 +176,7 @@ function highlightAnswer(q: QuizQuestion) {
     <footer class="result-action-bar">
       <div class="action-bar-content">
 
-        <div v-else class="action-buttons result-group">
+        <div class="action-buttons result-group">
           <button class="btn btn-primary btn-xl btn-hero start-pulse" @click="$emit('newSession')">
             <div class="btn-shimmer shimmer-effect"></div>
             <span>New Session</span>
@@ -468,6 +443,8 @@ function highlightAnswer(q: QuizQuestion) {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .review-card {
@@ -475,6 +452,12 @@ function highlightAnswer(q: QuizQuestion) {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  z-index: 10; /* Bring hovered card to front for tooltips */
 }
 
 .review-meta {
@@ -551,59 +534,29 @@ function highlightAnswer(q: QuizQuestion) {
   display: flex;
   flex-wrap: wrap;
   gap: 0 0.4rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.full-breakdown-row {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label-inline {
+  font-weight: 800;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-right: 0.25rem;
 }
 
 .token-simple {
   font-weight: 600;
-}
-
-.romaji-row { color: var(--text-muted); font-style: italic; }
-.english-row { color: var(--text-subtle); }
-
-.token-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.token-premium {
-  position: relative;
-  cursor: help;
-  padding: 0.1rem 0.25rem;
-  border-radius: 6px;
-  font-weight: 850;
-  transition: all 0.2s ease;
-}
-
-.token-premium:hover {
-  background: var(--bg-subtle);
-}
-
-.token-tooltip {
-  visibility: hidden;
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  background: var(--text-main);
-  color: white;
-  padding: 0.5rem 0.85rem;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  z-index: 100;
-  opacity: 0;
-  box-shadow: var(--shadow-lg);
-  transition: all 0.2s var(--ease-premium);
-}
-
-.token-premium:hover .token-tooltip,
-.token-premium:focus .token-tooltip,
-.token-premium:focus-within .token-tooltip {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(-14px);
 }
 
 ruby { ruby-position: over; }

@@ -24,6 +24,7 @@ defineProps<{
         
         <span v-if="meaning || romaji" class="token-tooltip">
           <div v-if="romaji" class="tooltip-romaji">{{ romaji }}</div>
+          <div v-if="romaji && meaning" class="tooltip-divider"></div>
           <div v-if="meaning" class="tooltip-meaning">{{ meaning }}</div>
         </span>
       </span>
@@ -40,65 +41,86 @@ defineProps<{
 .token-content {
   position: relative;
   cursor: help;
-  padding: 0.2rem 0.35rem;
+  padding: 0.25rem 0.4rem;
   border-radius: 8px;
   font-weight: 850;
   transition: all 0.2s ease;
   display: inline-block;
   z-index: 1;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.token-content:hover {
+.token-content:hover,
+.token-content:focus,
+.token-content:focus-within {
   background: var(--bg-subtle);
-  z-index: 2100; /* Bring hovered token above others */
+  z-index: 10000; /* Extremely high to ensure tooltips are on top */
 }
 
 .premium .token-content {
-  font-size: 1.1em;
+  font-size: 1.15em;
 }
 
 .mini .token-content {
-  font-size: 0.9em;
-  padding: 0.1rem 0.2rem;
+  font-size: 0.95em;
+  padding: 0.15rem 0.3rem;
   border-radius: 6px;
 }
 
 .token-tooltip {
   visibility: hidden;
   position: absolute;
-  bottom: 125%;
+  bottom: 135%;
   left: 50%;
-  transform: translateX(-50%) translateY(0);
-  background: var(--text-main);
-  color: white;
-  padding: 0.65rem 1rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
+  transform: translateX(-50%) translateY(5px);
+  background: #121826;
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
   font-weight: 600;
   white-space: nowrap;
-  z-index: 2200;
+  text-align: center;
+  z-index: 20000;
   opacity: 0;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   transition: all 0.25s var(--ease-premium);
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  min-width: 80px;
+  min-width: 100px;
 }
 
 .tooltip-romaji {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  opacity: 0.7;
-  font-style: italic;
-  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #ffffff !important;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.tooltip-divider {
+  width: 30px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0.15rem 0;
+  border-radius: 1px;
 }
 
 .tooltip-meaning {
   font-weight: 700;
+  font-size: 0.85rem;
+  color: #ffffff !important;
+  line-height: 1.2;
+  white-space: normal;
+  max-width: 180px;
 }
 
 /* Tooltip arrow */
@@ -108,17 +130,18 @@ defineProps<{
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  border-width: 6px;
+  border-width: 8px;
   border-style: solid;
-  border-color: var(--text-main) transparent transparent transparent;
+  border-color: #121826 transparent transparent transparent;
 }
 
 .token-content:hover .token-tooltip,
 .token-content:focus .token-tooltip,
-.token-content:focus-within .token-tooltip {
+.token-content:focus-within .token-tooltip,
+.token-content:active .token-tooltip {
   visibility: visible;
   opacity: 1;
-  transform: translateX(-50%) translateY(-8px);
+  transform: translateX(-50%) translateY(-10px);
 }
 
 .token-simple {

@@ -164,6 +164,7 @@ CRITICAL RULES FOR QUESTION GENERATION:
 7. SYMBOL-BY-SYMBOL BREAKDOWN: 
    - Every sentence (question and all options) MUST be broken down into 'tokens'.
    - Each token MUST be an object with: 'text', 'reading', 'meaning', and 'colorIndex'.
+   - "romajiTokens" and "englishTokens" MUST also be provided for EVERY option, matching the count of "tokens".
    - NEVER return a token as a plain string; always use an object.
    - Use 'colorIndex' to group related words.
 
