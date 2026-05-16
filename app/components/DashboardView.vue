@@ -704,6 +704,9 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   letter-spacing: 0.08em;
   text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .step-node.active .step-label {
@@ -808,10 +811,10 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .hero-title {
-  font-size: 2.5rem !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.04em !important;
-  margin-bottom: 0.5rem !important;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, var(--text-main), #475569);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1819,6 +1822,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
+  flex-wrap: nowrap;
 }
 
 .hidden-input {
@@ -1838,6 +1842,8 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 .toggle-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
 }
 
 .toggle-text .title {
@@ -2252,6 +2258,19 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
     margin-bottom: 1rem;
   }
 
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .premium-toggle {
+    padding: 1.25rem;
+  }
+
   .choice-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -2288,6 +2307,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
   .config-grid-premium {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .format-toggle-grid {
