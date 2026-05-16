@@ -257,7 +257,7 @@ function handleBackToDashboard() {
 
     <!-- Results: Summary -->
     <Transition name="scale-in" mode="out-in">
-      <div v-if="isFinished" class="session-results scroll-y">
+      <div v-if="isFinished" class="session-results">
         <ResultView
           key="result"
           :score="score"
@@ -268,6 +268,7 @@ function handleBackToDashboard() {
           :wrongCount="wrongCount"
           :questions="questions"
           :userAnswers="userAnswers"
+          :topic="quiz.quizTitle.value"
           :scoreColor="scoreColor"
           :showReview="showReview"
           @update:showReview="(v:boolean)=>showReview=v"
@@ -290,6 +291,14 @@ function handleBackToDashboard() {
   flex-direction: column;
   overflow: hidden;
   background-color: var(--bg-page);
+}
+
+.session-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
 }
 
 

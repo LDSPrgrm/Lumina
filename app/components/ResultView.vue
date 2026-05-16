@@ -12,6 +12,7 @@ const props = defineProps<{
   wrongCount: number;
   questions: QuizQuestion[];
   userAnswers: (number | null)[];
+  topic: string;
   scoreColor: string;
   showReview: boolean;
 }>();
@@ -82,7 +83,7 @@ function highlightAnswer(q: QuizQuestion) {
           <h1 class="text-gradient">{{ scoreMessage }}</h1>
           <div class="result-emoji animate-bounce-premium">{{ scoreEmoji }}</div>
           <p class="summary">
-            You've completed your session on <strong>{{ questions[0]?.topic || 'New Topics' }}</strong>.
+            You've completed your session on <strong>{{ topic }}</strong>.
             <span v-if="wrongCount > 0"> You mastered most of the material!</span>
           </p>
         </div>
@@ -214,7 +215,7 @@ function highlightAnswer(q: QuizQuestion) {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 3rem; /* Reduced from 8rem - flex siblings don't overlap */
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
@@ -542,9 +543,15 @@ function highlightAnswer(q: QuizQuestion) {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px dashed var(--border-light);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.4rem 0.75rem;
+  align-items: baseline;
+}
+
+.full-breakdown-row .romaji-row,
+.full-breakdown-row .english-row {
+  display: contents;
 }
 
 .label-inline {
@@ -552,7 +559,7 @@ function highlightAnswer(q: QuizQuestion) {
   color: var(--text-muted);
   font-size: 0.75rem;
   text-transform: uppercase;
-  margin-right: 0.25rem;
+  margin-right: 0;
 }
 
 .token-simple {
@@ -577,7 +584,11 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 }
 
 @media (max-width: 768px) {
-  .result-action-bar { padding: 0.75rem 1rem; }
+  .result-action-bar { 
+    padding: 1rem 1.5rem; 
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid var(--border-main);
+  }
   .action-buttons.result-group {
     flex-direction: column;
     width: 100%;
@@ -591,16 +602,18 @@ rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
   }
   .secondary-actions .btn {
     min-width: 0;
+    padding: 0.7rem 0.5rem;
   }
   .action-buttons .btn-hero {
     width: 100%;
+    padding: 0.8rem 1.5rem;
   }
 }
 
 @media (max-width: 640px) {
   .result-body {
     gap: 1.25rem;
-    padding: 1rem 0.75rem 1.5rem;
+    padding: 1rem 0.75rem 3rem; /* Reduced from 10rem - flex siblings don't overlap */
   }
 
   .result-celebration {

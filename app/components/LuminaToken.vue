@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps<{
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const props = defineProps<{
   text: string;
   reading?: string;
   romaji?: string;
@@ -7,10 +9,58 @@ defineProps<{
   colorIndex?: number | string;
   variant?: 'premium' | 'simple' | 'mini';
 }>();
+
+const showTooltip = ref(false);
+const tooltipStyle = ref({ top: '0px', left: '0px', transform: 'none' });
+const tokenRef = ref<HTMLElement | null>(null);
+const tooltipRef = ref<HTMLElement | null>(null);
+
+function updatePosition() {
+  if (!tokenRef.value) return;
+  const rect = tokenRef.value.getBoundingClientRect();
+  
+  // Position above the token, centered horizontally
+  // Bottom of tooltip = rect.top - gap
+  // We'll set top to rect.top and use transform to move it up
+  tooltipStyle.value = {
+    top: `${rect.top}px`,
+    left: `${rect.left + rect.width / 2}px`,
+    transform: 'translateX(-50%) translateY(-100%) translateY(-8px)'
+  };
+}
+
+function handleEnter() {
+  showTooltip.value = true;
+  // Use nextTick or a small timeout to ensure rect is updated if layout changed
+  updatePosition();
+}
+
+function handleLeave() {
+  showTooltip.value = false;
+}
+
+// Update position on scroll or resize to keep it attached to the token
+onMounted(() => {
+  window.addEventListener('scroll', updatePosition, true);
+  window.addEventListener('resize', updatePosition);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updatePosition, true);
+  window.removeEventListener('resize', updatePosition);
+});
 </script>
 
 <template>
-  <span class="lumina-token" :class="[variant || 'premium', colorIndex ? `token-${colorIndex}` : '']">
+  <span 
+    ref="tokenRef"
+    class="lumina-token" 
+    :class="[variant || 'premium', colorIndex ? `token-${colorIndex}` : '']"
+    @mouseenter="handleEnter"
+    @mouseleave="handleLeave"
+    @focusin="handleEnter"
+    @focusout="handleLeave"
+  >
     <template v-if="variant === 'simple'">
       {{ text }}
     </template>
@@ -22,11 +72,20 @@ defineProps<{
         </ruby>
         <span v-else>{{ text }}</span>
         
-        <span v-if="meaning || romaji" class="token-tooltip">
-          <div v-if="romaji" class="tooltip-romaji">{{ romaji }}</div>
-          <div v-if="romaji && meaning" class="tooltip-divider"></div>
-          <div v-if="meaning" class="tooltip-meaning">{{ meaning }}</div>
-        </span>
+        <Teleport to="body">
+          <Transition name="tooltip-fade">
+            <span 
+              v-if="(meaning || romaji) && showTooltip" 
+              ref="tooltipRef"
+              class="token-tooltip teleported"
+              :style="tooltipStyle"
+            >
+              <div v-if="romaji" class="tooltip-romaji">{{ romaji }}</div>
+              <div v-if="romaji && meaning" class="tooltip-divider"></div>
+              <div v-if="meaning" class="tooltip-meaning">{{ meaning }}</div>
+            </span>
+          </Transition>
+        </Teleport>
       </span>
     </template>
   </span>
@@ -56,7 +115,7 @@ defineProps<{
 .token-content:focus,
 .token-content:focus-within {
   background: var(--bg-subtle);
-  z-index: 10000; /* Extremely high to ensure tooltips are on top */
+  z-index: 10000;
 }
 
 .premium .token-content {
@@ -70,11 +129,7 @@ defineProps<{
 }
 
 .token-tooltip {
-  visibility: hidden;
-  position: absolute;
-  bottom: 135%;
-  left: 50%;
-  transform: translateX(-50%) translateY(5px);
+  position: fixed; /* Use fixed for teleported tooltips */
   background: #121826;
   color: #ffffff;
   padding: 0.75rem 1.25rem;
@@ -83,12 +138,10 @@ defineProps<{
   font-weight: 600;
   white-space: nowrap;
   text-align: center;
-  z-index: 20000;
-  opacity: 0;
+  z-index: 99999; /* Max possible */
   box-shadow: 
     0 10px 30px rgba(0,0,0,0.35),
     0 0 0 1px rgba(255, 255, 255, 0.1);
-  transition: all 0.25s var(--ease-premium);
   pointer-events: none;
   display: flex;
   flex-direction: column;
@@ -135,13 +188,16 @@ defineProps<{
   border-color: #121826 transparent transparent transparent;
 }
 
-.token-content:hover .token-tooltip,
-.token-content:focus .token-tooltip,
-.token-content:focus-within .token-tooltip,
-.token-content:active .token-tooltip {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(-10px);
+/* Transitions */
+.tooltip-fade-enter-active,
+.tooltip-fade-leave-active {
+  transition: all 0.25s var(--ease-premium);
+}
+
+.tooltip-fade-enter-from,
+.tooltip-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-100%) translateY(0px) !important;
 }
 
 .token-simple {
@@ -151,7 +207,6 @@ defineProps<{
 ruby { ruby-position: over; }
 rt { font-size: 0.55em; color: var(--text-subtle); font-weight: 500; }
 
-/* Color tokens - fallback if not in main.css */
 .token-0 { color: #3b82f6; }
 .token-1 { color: #10b981; }
 .token-2 { color: #8b5cf6; }

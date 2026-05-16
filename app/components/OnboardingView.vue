@@ -20,7 +20,7 @@ const handleFinish = async () => {
   <div class="onboarding-wrapper">
     <Transition name="slide-fade" mode="out-in">
       <!-- Step 1: Welcome -->
-      <div v-if="step === 1" key="welcome" class="onboarding-card glass-card">
+      <div v-if="step === 1" key="welcome" class="onboarding-card glass-premium">
         <div class="onboarding-content">
           <div class="welcome-badge">
             <span class="badge badge-completed">v1.0 is here</span>
@@ -58,7 +58,7 @@ const handleFinish = async () => {
       </div>
 
       <!-- Step 2: API Key -->
-      <div v-else key="config" class="onboarding-card glass-card">
+      <div v-else key="config" class="onboarding-card glass-premium">
         <div class="onboarding-content">
           <button class="back-btn" @click="step = 1">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -128,7 +128,6 @@ const handleFinish = async () => {
   align-items: center;
   justify-content: center;
   flex: 1;
-  overflow-y: auto;
   padding: 2rem 1rem;
 }
 

@@ -98,7 +98,7 @@ const QuestionSchema = z.object({
   options: z.array(OptionSchema).length(4),
   correctIndex: z.number().min(0).max(3).nullable().default(0),
   explanation: z.string().nullable().default("No explanation provided."),
-  topic: z.string().optional().default("New Topic"),
+  topic: z.string().optional().default("General Practice"),
 });
 
 

@@ -95,16 +95,25 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.glass-premium {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 20px 50px -10px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
 .card-premium {
   background: var(--bg-card);
   border: 1px solid var(--border-main);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: all var(--duration-main) var(--ease-premium);
 }
 
 .card-premium:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary-border);
 }

@@ -52,12 +52,17 @@ function handleRetake(session: any) {
       </template>
     </AppHeader>
 
-    <!-- Onboarding Screen -->
-    <OnboardingView v-if="!store.isConfigured" />
-
-    <QuizPlayer v-if="store.isConfigured && store.currentTab === 'quiz'" />
-    <SettingsPanel v-if="store.isConfigured && store.currentTab === 'settings'" />
-    <HistoryView v-if="store.isConfigured && store.currentTab === 'history'" @retake="handleRetake" />
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <OnboardingView v-if="!store.isConfigured" />
+      <Transition v-else name="page-fade" mode="out-in">
+        <div :key="store.currentTab" class="view-container">
+          <QuizPlayer v-if="store.currentTab === 'quiz'" />
+          <SettingsPanel v-if="store.currentTab === 'settings'" />
+          <HistoryView v-if="store.currentTab === 'history'" @retake="handleRetake" />
+        </div>
+      </Transition>
+    </main>
   </div>
 </template>
 
@@ -68,7 +73,39 @@ function handleRetake(session: any) {
   flex-direction: column;
   position: relative;
   z-index: 0;
-  overflow: hidden; /* Lock entire app */
+  overflow: hidden; 
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Page Transitions */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.3s var(--ease-premium), transform 0.3s var(--ease-premium);
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 
@@ -103,7 +140,7 @@ function handleRetake(session: any) {
 }
 
 .pill-btn.active {
-  background: var(--bg-main);
+  background: white;
   color: var(--primary);
   box-shadow: var(--shadow-sm);
 }
