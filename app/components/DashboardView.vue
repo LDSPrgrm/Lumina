@@ -155,16 +155,13 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
                 <div class="form-stack">
                   <div class="form-group">
-                    <div class="label-row">
-                      <label class="section-label-premium">Popular Destinations</label>
-                      <div class="native-badge">Learner Native: English 🇺🇸</div>
-                    </div>
                     <div class="language-grid-premium">
                       <div 
-                        v-for="lang in popularLanguages" 
+                        v-for="(lang, idx) in popularLanguages" 
                         :key="lang.name"
                         class="lang-card-premium"
                         :class="{ active: model.targetLanguage === lang.name }"
+                        :style="{ '--idx': idx }"
                         @click="update('targetLanguage', lang.name)"
                       >
                         <div class="lang-visual" :style="{ '--lang-color': lang.color }">
@@ -206,10 +203,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
                 <div class="context-type-grid-premium">
                   <div 
-                    v-for="type in contextTypes" 
+                    v-for="(type, idx) in contextTypes" 
                     :key="type.id"
                     class="context-type-card-premium"
                     :class="{ active: activeContextType === type.id }"
+                    :style="{ '--idx': idx }"
                     @click="activeContextType = type.id"
                   >
                     <div class="type-visual">
@@ -251,10 +249,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
                       </div>
                       <div class="topic-chip-grid-premium">
                         <button 
-                          v-for="t in commonTopics" 
+                          v-for="(t, idx) in commonTopics" 
                           :key="t"
                           class="topic-chip-premium"
                           :class="{ active: model.topic.includes(t) }"
+                          :style="{ '--idx': idx }"
                           @click="toggleTopic(t)"
                         >
                           <span class="chip-dot" v-if="model.topic.includes(t)"></span>
@@ -280,10 +279,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
                       <label class="section-label-premium">Choose Your Environment</label>
                       <div class="scenario-grid-premium">
                         <div 
-                          v-for="s in scenarioPresets" 
+                          v-for="(s, idx) in scenarioPresets" 
                           :key="s"
                           class="scenario-card-premium"
                           :class="{ active: model.learningScenario === s }"
+                          :style="{ '--idx': idx }"
                           @click="update('learningScenario', s)"
                         >
                           <div class="scenario-content">
@@ -314,10 +314,11 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
                     <label class="section-label-premium">Proficiency Level</label>
                     <div class="proficiency-grid-premium">
                       <div 
-                        v-for="lvl in levels" 
+                        v-for="(lvl, idx) in levels" 
                         :key="lvl"
                         class="lvl-card-premium"
                         :class="{ active: model.proficiencyLevel === lvl }"
+                        :style="{ '--idx': idx }"
                         @click="update('proficiencyLevel', lvl)"
                       >
                         <span class="lvl-text">{{ lvl }}</span>
@@ -541,8 +542,68 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   overflow: hidden;
   min-height: 0;
   position: relative;
-  background: radial-gradient(circle at 0% 0%, var(--primary-soft) 0%, transparent 40%),
-              radial-gradient(circle at 100% 100%, var(--primary-soft) 0%, transparent 40%);
+  background: var(--bg-main);
+}
+
+.background-decor {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  filter: blur(80px);
+  opacity: 0.15;
+  border-radius: 50%;
+  animation: blob-float 20s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--primary);
+  top: -100px;
+  left: -100px;
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: #f472b6;
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -5s;
+  animation-duration: 25s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #818cf8;
+  top: 40%;
+  left: 30%;
+  animation-delay: -10s;
+  animation-duration: 30s;
+}
+
+/* Staggered Entry Animation */
+.step-pane > * {
+  animation: fade-in-up 0.6s var(--ease-premium) both;
+  animation-delay: calc(var(--idx, 0) * 0.1s);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-header {
@@ -609,6 +670,17 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   justify-content: center;
   font-size: 1.35rem;
   transition: all 0.3s var(--ease-premium);
+  position: relative;
+  z-index: 1;
+}
+
+.step-node.active .step-icon-wrap {
+  animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1.15); }
+  50% { transform: translateY(-8px) scale(1.15); }
 }
 
 .step-node.active .step-icon-wrap {
@@ -652,6 +724,25 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   height: 100%;
   background: var(--primary);
   transition: width 0.6s var(--ease-premium);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 15px;
+  height: 100%;
+  background: white;
+  filter: blur(5px);
+  opacity: 0.8;
+  animation: bar-glow 1s infinite alternate;
+}
+
+@keyframes bar-glow {
+  from { opacity: 0.4; transform: scaleX(0.8); }
+  to { opacity: 0.8; transform: scaleX(1.2); }
 }
 
 /* Layout Grid - Stacked Layout */
@@ -772,9 +863,26 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 }
 
 .lang-card-premium.active {
-  background: var(--primary-soft);
+  background: white;
   border-color: var(--primary);
-  box-shadow: 0 10px 25px var(--primary-glow);
+  box-shadow: 0 10px 25px var(--primary-glow), inset 0 0 0 2px var(--primary);
+  transform: scale(1.05);
+}
+
+.lang-card-premium.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  box-shadow: 0 0 20px var(--primary-glow);
+  animation: electric-pulse 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes electric-pulse {
+  0% { box-shadow: 0 0 0 0 var(--primary-glow); }
+  50% { box-shadow: 0 0 20px var(--primary-glow); }
+  100% { box-shadow: 0 0 0 0 var(--primary-glow); }
 }
 
 .lang-visual {
@@ -835,7 +943,13 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   justify-content: center;
   font-size: 0.7rem;
   font-weight: 900;
-  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 
 /* Input Premium v2 */
@@ -1051,6 +1165,16 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   border-color: var(--primary);
   border-width: 2px;
   box-shadow: 0 15px 35px var(--primary-glow);
+  transform: scale(1.02) translateY(-4px);
+}
+
+.context-type-card-premium.active .type-visual {
+  animation: bounce-subtle 2s infinite ease-in-out;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: scale(1.1) translateY(0); }
+  50% { transform: scale(1.1) translateY(-5px); }
 }
 
 .type-visual {
@@ -1119,6 +1243,21 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   animation: pulse-ring 2s infinite;
 }
 
+.context-type-card-premium.active::before {
+  content: '✦';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: var(--primary);
+  font-size: 1.2rem;
+  animation: sparkle 1.5s infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.5) rotate(180deg); opacity: 0.5; }
+}
+
 /* Topic Chips Premium */
 .topic-chip-grid-premium {
   display: flex;
@@ -1152,6 +1291,23 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   color: white;
   border-color: var(--primary);
   box-shadow: 0 8px 20px var(--primary-glow);
+  transform: scale(1.05);
+  position: relative;
+}
+
+.topic-chip-premium.active::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--primary);
+  border-radius: 99px;
+  animation: ripple 1s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.3); opacity: 0; }
 }
 
 .chip-dot {
@@ -1540,6 +1696,37 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   cursor: pointer;
   transition: all 0.3s var(--ease-premium);
   box-shadow: 0 4px 15px var(--primary-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:not(:disabled)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.btn-primary:not(:disabled):hover::before {
+  left: 100%;
+}
+
+.btn-primary:not(:disabled) {
+  animation: energy-pulse 4s infinite;
+}
+
+@keyframes energy-pulse {
+  0%, 100% { box-shadow: 0 4px 15px var(--primary-glow); }
+  50% { box-shadow: 0 4px 25px var(--primary-glow), 0 0 0 4px var(--primary-soft); }
 }
 
 .btn-next-premium:hover:not(:disabled), .btn-start-premium:hover:not(:disabled) {
@@ -1761,6 +1948,23 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
   font-size: 2rem;
   color: white;
   box-shadow: 0 10px 25px var(--primary-glow);
+  overflow: hidden;
+}
+
+.visual-circle-premium::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  from { top: -100%; }
+  to { top: 200%; }
 }
 
 .pulse-ring-slow, .pulse-ring-fast {
@@ -1903,6 +2107,7 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
 .review-footer-action {
   text-align: center;
+  width: 100%;
 }
 
 /* Sidebar Styles */
@@ -2062,6 +2267,42 @@ const progressWidth = computed(() => (activeTab.value / (tabs.length - 1)) * 100
 
   .summary-card {
     padding: 1rem;
+  }
+
+  .context-type-grid-premium {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .proficiency-grid-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .review-grid-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-grid-premium {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .config-grid-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .format-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-footer-premium {
+    padding: 1.5rem;
+    flex-direction: column-reverse;
+  }
+
+  .dashboard-footer-premium .btn-next-premium,
+  .dashboard-footer-premium .btn-start-premium,
+  .dashboard-footer-premium .btn-back-premium {
+    width: 100%;
   }
 }
 
