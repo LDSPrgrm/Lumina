@@ -13,9 +13,8 @@ export const useSettingsStore = defineStore('settings', {
     learningScenario: 'Daily Life',
     difficultyMode: 'Standard',
     includePhonetics: true,
-    nativeLanguage: '',
+    nativeLanguage: 'English',
     learningGoal: 'Conversational',
-    regionalDialect: 'Standard',
     explanationDepth: 'Detailed',
     isConfigured: false,
     currentTab: 'quiz',
@@ -43,14 +42,8 @@ export const useSettingsStore = defineStore('settings', {
         const savedLang = localStorage.getItem('lumina_target_lang')
         if (savedLang) this.targetLanguage = savedLang
 
-        const savedNative = localStorage.getItem('lumina_native_lang')
-        if (savedNative) this.nativeLanguage = savedNative
-
         const savedGoal = localStorage.getItem('lumina_learning_goal')
         if (savedGoal) this.learningGoal = savedGoal
-
-        const savedDialect = localStorage.getItem('lumina_regional_dialect')
-        if (savedDialect) this.regionalDialect = savedDialect
 
         const savedDepth = localStorage.getItem('lumina_explanation_depth')
         if (savedDepth) this.explanationDepth = savedDepth

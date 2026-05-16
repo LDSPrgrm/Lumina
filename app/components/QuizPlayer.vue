@@ -23,9 +23,7 @@ const settings = useDashboardSettings();
 const dashboardModel = computed({
   get: () => ({
     targetLanguage: settings.targetLanguage.value,
-    nativeLanguage: settings.nativeLanguage.value,
     learningGoal: settings.learningGoal.value,
-    regionalDialect: settings.regionalDialect.value,
     proficiencyLevel: settings.proficiencyLevel.value,
     topic: settings.topic.value,
     quizLength: settings.quizLength.value,
@@ -40,9 +38,7 @@ const dashboardModel = computed({
   set: (val) => {
     if (!val) return;
     settings.targetLanguage.value = val.targetLanguage;
-    settings.nativeLanguage.value = val.nativeLanguage;
     settings.learningGoal.value = val.learningGoal;
-    settings.regionalDialect.value = val.regionalDialect;
     settings.proficiencyLevel.value = val.proficiencyLevel;
     settings.topic.value = val.topic;
     settings.quizLength.value = val.quizLength;
@@ -59,9 +55,7 @@ const dashboardModel = computed({
 onMounted(() => {
   if (process.client) {
     settings.targetLanguage.value = localStorage.getItem("lumina_target_lang") || settings.targetLanguage.value;
-    settings.nativeLanguage.value = localStorage.getItem("lumina_native_lang") || settings.nativeLanguage.value;
     settings.learningGoal.value = localStorage.getItem("lumina_learning_goal") || settings.learningGoal.value;
-    settings.regionalDialect.value = localStorage.getItem("lumina_regional_dialect") || settings.regionalDialect.value;
     settings.explanationDepth.value = localStorage.getItem("lumina_explanation_depth") || settings.explanationDepth.value;
     settings.proficiencyLevel.value = localStorage.getItem("lumina_level") || settings.proficiencyLevel.value;
     settings.topic.value = localStorage.getItem("lumina_topic") || settings.topic.value;

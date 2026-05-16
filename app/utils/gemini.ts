@@ -95,10 +95,16 @@ const QuestionSchema = z.object({
   questionTokens: z.array(TokenSchema).optional().default([]),
   questionRomajiTokens: z.array(SimpleTokenSchema).optional().default([]),
   questionEnglishTokens: z.array(SimpleTokenSchema).optional().default([]),
-  options: z.array(OptionSchema).length(4),
-  correctIndex: z.number().min(0).max(3).nullable().default(0),
+  options: z.array(OptionSchema).min(1),
+  correctIndex: z.number().min(0).nullable().default(0),
   explanation: z.string().nullable().default("No explanation provided."),
   topic: z.string().optional().default("General Practice"),
+}).refine((data) => {
+  if (data.correctIndex === null) return true;
+  return data.correctIndex < data.options.length;
+}, {
+  message: "correctIndex must be within the bounds of the options array",
+  path: ["correctIndex"],
 });
 
 
@@ -148,7 +154,8 @@ const SYSTEM_INSTRUCTION = `You are a professional language tutor specializing i
 
 CRITICAL RULES FOR QUESTION GENERATION:
 1. THE CHALLENGE: The goal is to test the learner's deep understanding. 
-2. FILL-IN-THE-BLANKS: For "Multiple Choice" questions, replace the target word/phrase with "____".
+2. OPTIONS COUNT: EVERY question MUST have EXACTLY 4 options.
+3. FILL-IN-THE-BLANKS: For "Multiple Choice" questions, replace the target word/phrase with "____".
    - DO NOT include the answer in the question text.
    - The blank "____" MUST be a separate token in "questionTokens".
 3. DISTRACTOR QUALITY: 
@@ -190,7 +197,6 @@ const PROMPT_TEMPLATE = (params: Record<string, string | number | boolean>) => {
     `Topic: ${params.topic}`,
     `Native language of learner: ${params.nativeLanguage}`,
     `Target language: ${params.language} — ALL questions and options MUST be written in this language.`,
-    `Dialect: ${params.regionalDialect}`,
     `Focus Area: ${params.focusArea}`,
     `Learning Goal: ${params.learningGoal}`,
     `Tone: ${params.tone}`,
@@ -217,17 +223,14 @@ export const generateQuiz = async (
   learningScenario: string = "Daily Life",
   difficultyMode: string = "Standard",
   includePhonetics: boolean = true,
-  nativeLanguage: string = "English",
   learningGoal: string = "Conversational",
-  regionalDialect: string = "Standard",
   explanationDepth: string = "Detailed",
 ): Promise<QuizQuestion[]> => {
   const params = {
     level,
     topic,
-    nativeLanguage,
+    nativeLanguage: "English",
     language,
-    regionalDialect,
     focusArea,
     learningGoal,
     tone,
@@ -258,42 +261,43 @@ export const generateQuiz = async (
   
   for (let i = 0; i < 3; i++) {
     try {
-      response = await fetch(url, options);
-      if (response.ok) break;
-
-      const err = await response.json().catch(() => ({}));
-      lastError = new Error(err.error?.message || `API error ${response.status}`);
+      const response = await fetch(url, options);
       
-      // Do not retry client errors except 429 Too Many Requests
-      if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-        throw lastError;
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API error ${response.status}`);
       }
+
+      const data = await response.json();
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+      // Strip markdown fences if present
+      text = text
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/, "")
+        .trim();
+
+      const raw = JSON.parse(text);
+      const dataParsed = Array.isArray(raw) ? { questions: raw } : raw;
+      const questions = QuizZodSchema.parse(dataParsed).questions as QuizQuestion[];
+      
+      return shuffleQuizQuestions(questions);
     } catch (e: any) {
       lastError = e;
-    }
-
-    if (i < 2) {
-      await new Promise(r => setTimeout(r, delay));
-      delay *= 2;
+      
+      // If it's a non-retryable API error (4xx but not 429), throw immediately
+      if (e.message.includes("API error") && !e.message.includes("429")) {
+        throw e;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      if (i < 2) {
+        await new Promise(r => setTimeout(r, delay));
+        delay *= 2;
+      }
     }
   }
 
-  if (!response || !response.ok) {
-    throw lastError || new Error("Failed to connect to the Gemini API.");
-  }
-
-  const data = await response.json();
-  let text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-  // Strip markdown fences if present
-  text = text
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/, "")
-    .trim();
-
-  const raw = JSON.parse(text);
-  const dataParsed = Array.isArray(raw) ? { questions: raw } : raw;
-  const questions = QuizZodSchema.parse(dataParsed).questions as QuizQuestion[];
-  return shuffleQuizQuestions(questions);
+  throw lastError || new Error("Failed to generate a valid quiz after multiple attempts.");
 };
 

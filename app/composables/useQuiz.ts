@@ -26,9 +26,8 @@ export function useDashboardSettings() {
   const store = useSettingsStore();
 
   const targetLanguage = ref(store.targetLanguage);
-  const nativeLanguage = ref(store.nativeLanguage);
+  const nativeLanguage = ref('English');
   const learningGoal = ref(store.learningGoal);
-  const regionalDialect = ref(store.regionalDialect);
   const explanationDepth = ref(store.explanationDepth);
   const proficiencyLevel = ref(store.proficiencyLevel);
   const topic = ref(store.topic);
@@ -42,9 +41,8 @@ export function useDashboardSettings() {
 
   function persistToStore() {
     store.targetLanguage = targetLanguage.value;
-    store.nativeLanguage = nativeLanguage.value;
+    store.nativeLanguage = 'English';
     store.learningGoal = learningGoal.value;
-    store.regionalDialect = regionalDialect.value;
     store.explanationDepth = explanationDepth.value;
     store.proficiencyLevel = proficiencyLevel.value;
     store.topic = topic.value;
@@ -60,9 +58,7 @@ export function useDashboardSettings() {
   function persistToLocalStorage() {
     if (!process.client) return;
     localStorage.setItem("lumina_target_lang", targetLanguage.value);
-    localStorage.setItem("lumina_native_lang", nativeLanguage.value);
     localStorage.setItem("lumina_learning_goal", learningGoal.value);
-    localStorage.setItem("lumina_regional_dialect", regionalDialect.value);
     localStorage.setItem("lumina_explanation_depth", explanationDepth.value);
     localStorage.setItem("lumina_level", proficiencyLevel.value);
     localStorage.setItem("lumina_topic", topic.value);
@@ -75,7 +71,7 @@ export function useDashboardSettings() {
   }
 
   return {
-    targetLanguage, nativeLanguage, learningGoal, regionalDialect,
+    targetLanguage, nativeLanguage, learningGoal,
     explanationDepth, proficiencyLevel, topic, quizLength, focusArea,
     quizFormat, tone, learningScenario, difficultyMode, includePhonetics,
     persistToStore, persistToLocalStorage,
@@ -205,9 +201,7 @@ export function useQuiz() {
         settings.learningScenario as string,
         settings.difficultyMode as string,
         settings.includePhonetics as boolean,
-        settings.nativeLanguage as string,
         settings.learningGoal as string,
-        settings.regionalDialect as string,
         settings.explanationDepth as string,
       );
       quizTitle.value = settings.topic as string || 'General Session';
